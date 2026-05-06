@@ -2,13 +2,13 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
- 
+
   const { facility_name, resident_name, room_number, items, registered_date, resident_id } = req.body;
- 
+
   if (!resident_name || !items) {
     return res.status(400).json({ error: 'データが不足しています' });
   }
- 
+
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
   const headers = {
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     'apikey': SUPABASE_KEY,
     'Authorization': `Bearer ${SUPABASE_KEY}`,
   };
- 
+
   try {
     if (resident_id) {
       // 既存の入居者に追記
@@ -45,15 +45,15 @@ export default async function handler(req, res) {
         return res.status(200).json({ success: true, data, merged: true });
       }
     }
- 
+
     // 同じ施設・入居者名・部屋番号で検索
     let searchUrl = `${SUPABASE_URL}/rest/v1/residents?resident_name=eq.${encodeURIComponent(resident_name)}`;
     if (facility_name) searchUrl += `&facility_name=eq.${encodeURIComponent(facility_name)}`;
     if (room_number) searchUrl += `&room_number=eq.${encodeURIComponent(room_number)}`;
- 
+
     const searchResp = await fetch(searchUrl, { headers });
     const existing = await searchResp.json();
- 
+
     if (existing.length > 0) {
       // 既存に追記
       const oldItems = JSON.parse(existing[0].items || '[]');
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
       const data = await updateResp.json();
       return res.status(200).json({ success: true, data, merged: true });
     }
- 
+
     // 新規登録
     const createResp = await fetch(`${SUPABASE_URL}/rest/v1/residents`, {
       method: 'POST',
