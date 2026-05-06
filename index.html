@@ -17,27 +17,24 @@
     .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .card label { font-size: 12px; color: #6e6e73; display: block; margin-bottom: 6px; }
     .card input { width: 100%; font-size: 16px; border: none; outline: none; padding: 4px 0; border-bottom: 1px solid #e5e5ea; }
-    .section-title { font-size: 12px; font-weight: 600; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.05em; margin: 16px 0 8px; }
-    .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-    .cat-btn { padding: 12px 6px; border-radius: 10px; border: 1.5px solid #e5e5ea; background: #fff; font-size: 12px; cursor: pointer; text-align: center; color: #6e6e73; }
-    .cat-btn.active { border-color: #007aff; color: #007aff; background: #f0f7ff; font-weight: 600; }
-    .cat-btn .icon { font-size: 20px; display: block; margin-bottom: 4px; }
-    .camera-area { border: 2px dashed #c7c7cc; border-radius: 12px; padding: 24px 16px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #fff; }
-    .camera-area .icon { font-size: 40px; margin-bottom: 8px; }
-    .camera-area strong { font-size: 15px; color: #1d1d1f; display: block; margin-bottom: 4px; }
-    .camera-area p { font-size: 12px; color: #6e6e73; }
-    .preview-img { width: 100%; border-radius: 12px; margin-bottom: 12px; max-height: 200px; object-fit: cover; display: none; }
+    .camera-area { border: 2px dashed #c7c7cc; border-radius: 12px; padding: 32px 16px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #fff; }
+    .camera-area .icon { font-size: 48px; margin-bottom: 10px; }
+    .camera-area strong { font-size: 16px; color: #1d1d1f; display: block; margin-bottom: 6px; }
+    .camera-area p { font-size: 13px; color: #6e6e73; }
+    .preview-img { width: 100%; border-radius: 12px; margin-bottom: 12px; max-height: 240px; object-fit: cover; display: none; }
     .btn-primary { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 12px; background: #007aff; color: #fff; border: none; }
     .btn-primary:disabled { background: #c7c7cc; cursor: not-allowed; }
     .btn-secondary { width: 100%; padding: 12px; font-size: 14px; cursor: pointer; border-radius: 12px; background: #f5f5f7; color: #007aff; border: none; font-weight: 500; }
-    .loading { text-align: center; padding: 24px; display: none; }
-    .loading p { font-size: 14px; color: #6e6e73; margin-top: 8px; }
-    .spinner { width: 28px; height: 28px; border: 3px solid #e5e5ea; border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+    .loading { text-align: center; padding: 32px; display: none; }
+    .loading p { font-size: 14px; color: #6e6e73; margin-top: 10px; }
+    .spinner { width: 32px; height: 32px; border: 3px solid #e5e5ea; border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .result-header { display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px; }
     .result-header h3 { font-size: 16px; font-weight: 600; }
     .badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #e8f4fd; color: #007aff; font-weight: 500; }
-    .items-card { background: #fff; border-radius: 12px; padding: 0 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 12px; }
+    .cat-section { margin-bottom: 12px; }
+    .cat-header { font-size: 13px; font-weight: 600; color: #6e6e73; padding: 8px 0 6px; display: flex; align-items: center; gap: 6px; }
+    .items-card { background: #fff; border-radius: 12px; padding: 0 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .item-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #f2f2f7; }
     .item-row:last-child { border-bottom: none; }
     .item-dot { width: 22px; height: 22px; border-radius: 6px; border: 1px solid #e5e5ea; flex-shrink: 0; }
@@ -48,6 +45,7 @@
     .item-del { font-size: 20px; color: #c7c7cc; cursor: pointer; padding: 4px; line-height: 1; }
     .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .add-row input { flex: 1; font-size: 14px; padding: 10px 12px; border: 1px solid #e5e5ea; border-radius: 10px; outline: none; background: #fff; }
+    .add-row select { font-size: 13px; padding: 10px 8px; border: 1px solid #e5e5ea; border-radius: 10px; outline: none; background: #fff; }
     .add-row button { font-size: 14px; padding: 10px 16px; border-radius: 10px; background: #007aff; color: #fff; border: none; cursor: pointer; white-space: nowrap; }
     .action-btns { display: flex; gap: 8px; margin-top: 4px; }
     .action-btns button { flex: 1; }
@@ -64,19 +62,20 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .modal-header h2 { font-size: 17px; font-weight: 600; }
     .modal-close { font-size: 14px; color: #007aff; cursor: pointer; padding: 4px 8px; }
+    .tip-box { background: #f0f7ff; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 13px; color: #007aff; }
+    .error-msg { background: #fff2f2; border: 1px solid #ffcccc; border-radius: 10px; padding: 12px; font-size: 13px; color: #cc0000; margin-top: 12px; }
     @media print {
       body { background: #fff; }
       .header, .tabs, .content { display: none; }
       .modal { display: block !important; position: static; background: none; }
-      .modal-inner { margin: 0; padding: 0; box-shadow: none; }
+      .modal-inner { margin: 0; padding: 0; }
       .no-print { display: none !important; }
     }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { text-align: left; padding: 8px 6px; font-weight: 600; border-bottom: 2px solid #1d1d1f; font-size: 12px; }
     td { padding: 8px 6px; border-bottom: 1px solid #e5e5ea; }
     .color-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid #e5e5ea; vertical-align: middle; margin-right: 5px; }
-    .cat-section-title { font-size: 13px; font-weight: 600; color: #6e6e73; margin: 14px 0 6px; }
-    .error-msg { background: #fff2f2; border: 1px solid #ffcccc; border-radius: 10px; padding: 12px; font-size: 13px; color: #cc0000; margin-top: 12px; }
+    .print-cat-title { font-size: 13px; font-weight: 600; color: #6e6e73; margin: 14px 0 6px; }
   </style>
 </head>
 <body>
@@ -96,26 +95,22 @@
       <label>部屋番号</label>
       <input type="text" id="room-number" placeholder="例：203号室">
     </div>
-    <div class="section-title">カテゴリーを選択</div>
-    <div class="cat-grid">
-      <div class="cat-btn active" onclick="selectCat(this,'衣類')"><span class="icon">👕</span>衣類</div>
-      <div class="cat-btn" onclick="selectCat(this,'日用品')"><span class="icon">🪥</span>日用品</div>
-      <div class="cat-btn" onclick="selectCat(this,'貴重品')"><span class="icon">💼</span>貴重品</div>
-      <div class="cat-btn" onclick="selectCat(this,'電化製品')"><span class="icon">📺</span>電化製品</div>
-      <div class="cat-btn" onclick="selectCat(this,'趣味・娯楽')"><span class="icon">📚</span>趣味・娯楽</div>
-      <div class="cat-btn" onclick="selectCat(this,'医療用品')"><span class="icon">👓</span>医療用品</div>
+
+    <div class="tip-box">
+      💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます
     </div>
+
     <div class="camera-area" onclick="document.getElementById('file-input').click()">
       <div class="icon">📷</div>
       <strong>写真を撮影・選択</strong>
-      <p>タップしてカメラを起動<br>またはギャラリーから選択</p>
+      <p>持ち物を並べて撮影してください<br>カテゴリーは自動で判定します</p>
     </div>
     <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)" style="display:none;">
     <img id="preview" class="preview-img">
-    <button class="btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AIで持ち物を解析する</button>
+    <button class="btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AIで持ち物を一括解析する</button>
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      <p id="loading-text">AIが解析中...</p>
+      <p id="loading-text">AIが全ての持ち物を解析中...</p>
     </div>
     <div id="error-area"></div>
     <div id="result-area" style="display:none;">
@@ -123,9 +118,17 @@
         <h3>解析結果</h3>
         <span class="badge" id="item-count-badge">0点</span>
       </div>
-      <div class="items-card" id="items-list"></div>
+      <div id="items-by-category"></div>
       <div class="add-row">
-        <input type="text" id="new-item" placeholder="手動で追加する">
+        <select id="new-cat">
+          <option value="衣類">👕 衣類</option>
+          <option value="日用品">🪥 日用品</option>
+          <option value="貴重品">💼 貴重品</option>
+          <option value="電化製品">📺 電化製品</option>
+          <option value="趣味・娯楽">📚 趣味・娯楽</option>
+          <option value="医療用品">👓 医療用品</option>
+        </select>
+        <input type="text" id="new-item" placeholder="手動で追加">
         <button onclick="addManualItem()">追加</button>
       </div>
       <div class="action-btns">
@@ -149,29 +152,19 @@
 </div>
 <script>
 const CATEGORIES = {
-  '衣類':     { icon:'👕', prompt:'衣類（シャツ・ズボン・下着・靴下・上着など）を全て特定。色・種類・枚数を正確に。', colored: true },
-  '日用品':   { icon:'🪥', prompt:'日用品（歯ブラシ・タオル・石鹸・シャンプーなど）を全て特定。種類・数量を正確に。', colored: false },
-  '貴重品':   { icon:'💼', prompt:'貴重品（財布・通帳・印鑑・鍵・携帯電話など）を全て特定。種類・特徴を正確に。', colored: false },
-  '電化製品': { icon:'📺', prompt:'電化製品（テレビ・ラジオ・電気シェーバー・時計など）を全て特定。種類・特徴を正確に。', colored: false },
-  '趣味・娯楽':{ icon:'📚', prompt:'趣味・娯楽用品（本・雑誌・CD・写真・手芸用品など）を全て特定。種類・数量を正確に。', colored: false },
-  '医療用品': { icon:'👓', prompt:'医療用品（眼鏡・補聴器・杖・義歯・薬など）を全て特定。種類・特徴を正確に。', colored: false },
+  '衣類':     { icon:'👕' },
+  '日用品':   { icon:'🪥' },
+  '貴重品':   { icon:'💼' },
+  '電化製品': { icon:'📺' },
+  '趣味・娯楽':{ icon:'📚' },
+  '医療用品': { icon:'👓' },
 };
 
-let currentCat = '衣類';
 let currentImage = null;
 let currentItems = [];
 let residents = [];
 
-try { residents = JSON.parse(localStorage.getItem('care_v2') || '[]'); } catch(e) {}
-
-function selectCat(el, cat) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  currentCat = cat;
-  document.getElementById('result-area').style.display = 'none';
-  document.getElementById('error-area').innerHTML = '';
-  currentItems = [];
-}
+try { residents = JSON.parse(localStorage.getItem('care_v3') || '[]'); } catch(e) {}
 
 function showTab(tab) {
   document.getElementById('tab-scan').style.display = tab === 'scan' ? 'block' : 'none';
@@ -201,9 +194,7 @@ function handleImage(e) {
 
 async function analyzeImage() {
   if (!currentImage) return;
-  const catInfo = CATEGORIES[currentCat];
   document.getElementById('loading').style.display = 'block';
-  document.getElementById('loading-text').textContent = `AIが${currentCat}を解析中...`;
   document.getElementById('analyze-btn').disabled = true;
   document.getElementById('result-area').style.display = 'none';
   document.getElementById('error-area').innerHTML = '';
@@ -215,13 +206,7 @@ async function analyzeImage() {
     const resp = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        image: base64,
-        mediaType: mediaType,
-        category: currentCat,
-        prompt: catInfo.prompt,
-        colored: catInfo.colored
-      })
+      body: JSON.stringify({ image: base64, mediaType })
     });
 
     if (!resp.ok) {
@@ -230,7 +215,7 @@ async function analyzeImage() {
     }
 
     const data = await resp.json();
-    currentItems = (data.items || []).map(i => ({...i, category: currentCat}));
+    currentItems = data.items || [];
     renderItems();
     document.getElementById('result-area').style.display = 'block';
   } catch(e) {
@@ -241,32 +226,52 @@ async function analyzeImage() {
 }
 
 function renderItems() {
-  const list = document.getElementById('items-list');
+  const container = document.getElementById('items-by-category');
   document.getElementById('item-count-badge').textContent = currentItems.length + '点';
+
+  const grouped = {};
+  currentItems.forEach((item, i) => {
+    const cat = item.category || 'その他';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push({ ...item, _idx: i });
+  });
+
   if (currentItems.length === 0) {
-    list.innerHTML = '<div style="padding:16px; text-align:center; color:#6e6e73; font-size:14px;">持ち物が検出されませんでした</div>';
+    container.innerHTML = '<div class="items-card"><div style="padding:16px; text-align:center; color:#6e6e73; font-size:14px;">持ち物が検出されませんでした</div></div>';
     return;
   }
-  list.innerHTML = currentItems.map((item,i) => `
-    <div class="item-row">
-      <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
-      <div class="item-info">
-        <div class="item-name">${item.name}</div>
-        <div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'', item.note||''].filter(Boolean).join('　')}</div>
+
+  container.innerHTML = Object.entries(grouped).map(([cat, items]) => `
+    <div class="cat-section">
+      <div class="cat-header">${CATEGORIES[cat]?.icon || '📦'} ${cat}（${items.length}点）</div>
+      <div class="items-card">
+        ${items.map(item => `
+          <div class="item-row">
+            <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
+            <div class="item-info">
+              <div class="item-name">${item.name}</div>
+              <div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'', item.note||''].filter(Boolean).join('　')}</div>
+            </div>
+            <div class="item-count">${item.count}点</div>
+            <div class="item-del" onclick="removeItem(${item._idx})">×</div>
+          </div>
+        `).join('')}
       </div>
-      <div class="item-count">${item.count}点</div>
-      <div class="item-del" onclick="removeItem(${i})">×</div>
     </div>
   `).join('');
 }
 
-function removeItem(i) { currentItems.splice(i,1); renderItems(); }
+function removeItem(i) {
+  currentItems.splice(i, 1);
+  renderItems();
+}
 
 function addManualItem() {
   const input = document.getElementById('new-item');
+  const cat = document.getElementById('new-cat').value;
   const val = input.value.trim();
   if (!val) return;
-  currentItems.push({ name: val, color:'', colorCode:'#888', count:1, note:'', category: currentCat });
+  currentItems.push({ category: cat, name: val, color:'', colorCode:'#888', count:1, note:'' });
   renderItems();
   input.value = '';
 }
@@ -278,12 +283,13 @@ function saveResident() {
   if (currentItems.length === 0) { alert('持ち物が登録されていません'); return; }
   const existing = residents.find(r => r.name===name && r.room===room);
   if (existing) {
-    existing.items = [...existing.items.filter(i=>i.category!==currentCat), ...currentItems];
+    const newCats = [...new Set(currentItems.map(i=>i.category))];
+    existing.items = [...existing.items.filter(i=>!newCats.includes(i.category)), ...currentItems];
     existing.date = new Date().toLocaleDateString('ja-JP');
   } else {
     residents.unshift({ id: Date.now(), name, room, date: new Date().toLocaleDateString('ja-JP'), image: currentImage, items:[...currentItems] });
   }
-  try { localStorage.setItem('care_v2', JSON.stringify(residents)); } catch(e) {}
+  try { localStorage.setItem('care_v3', JSON.stringify(residents)); } catch(e) {}
   alert('保存しました！');
   document.getElementById('result-area').style.display = 'none';
   document.getElementById('preview').style.display = 'none';
@@ -296,11 +302,12 @@ function renderResidents() {
   if (residents.length===0) { c.innerHTML='<div class="empty"><div class="icon">👥</div>まだ登録されていません</div>'; return; }
   c.innerHTML = residents.map(r => {
     const cats = [...new Set(r.items.map(i=>i.category))];
+    const total = r.items.reduce((s,i)=>s+i.count,0);
     return `<div class="resident-card" onclick="viewResident(${r.id})">
       <div>
         <div class="resident-name">${r.name}</div>
-        <div class="resident-meta">${r.room?r.room+'　':''}${r.date}　${r.items.length}点</div>
-        <div class="resident-cats">${cats.map(c=>`<span class="cat-tag">${CATEGORIES[c]?.icon||''} ${c}</span>`).join('')}</div>
+        <div class="resident-meta">${r.room?r.room+'　':''}${r.date}　${total}点</div>
+        <div class="resident-cats">${cats.map(c=>`<span class="cat-tag">${CATEGORIES[c]?.icon||'📦'} ${c}</span>`).join('')}</div>
       </div>
       <div class="resident-arrow">›</div>
     </div>`;
@@ -311,7 +318,7 @@ function buildTable(items) {
   const cats = [...new Set(items.map(i=>i.category))];
   return cats.map(cat => {
     const catItems = items.filter(i=>i.category===cat);
-    return `<div class="cat-section-title">${CATEGORIES[cat]?.icon||''} ${cat}</div>
+    return `<div class="print-cat-title">${CATEGORIES[cat]?.icon||'📦'} ${cat}</div>
     <table>
       <thead><tr><th>品目</th><th>色・詳細</th><th>数</th><th>備考</th></tr></thead>
       <tbody>${catItems.map(item=>`
@@ -367,7 +374,7 @@ function closeModal() { document.getElementById('print-modal').style.display='no
 function deleteResident(id) {
   if (!confirm('削除しますか？この操作は元に戻せません。')) return;
   residents = residents.filter(r=>r.id!==id);
-  try { localStorage.setItem('care_v2', JSON.stringify(residents)); } catch(e) {}
+  try { localStorage.setItem('care_v3', JSON.stringify(residents)); } catch(e) {}
   closeModal();
   renderResidents();
 }
