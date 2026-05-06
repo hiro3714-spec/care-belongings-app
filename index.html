@@ -16,7 +16,22 @@
     .content { padding: 16px; max-width: 600px; margin: 0 auto; }
     .card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .card label { font-size: 12px; color: #6e6e73; display: block; margin-bottom: 6px; }
-    .card input, .card select { width: 100%; font-size: 15px; border: none; outline: none; padding: 4px 0; border-bottom: 1px solid #e5e5ea; background: transparent; }
+    .card input, .card select { width: 100%; font-size: 15px; border: none; outline: none; padding: 6px 0; border-bottom: 1px solid #e5e5ea; background: transparent; margin-bottom: 14px; }
+    .card input:last-child, .card select:last-child { margin-bottom: 0; }
+
+    .mode-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+    .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e5e5ea; background: #fff; font-size: 13px; cursor: pointer; text-align: center; color: #6e6e73; font-weight: 500; }
+    .mode-btn.active { border-color: #007aff; color: #007aff; background: #f0f7ff; }
+
+    .resident-select-list { max-height: 200px; overflow-y: auto; border: 1px solid #e5e5ea; border-radius: 10px; margin-bottom: 12px; }
+    .resident-select-item { padding: 12px 14px; border-bottom: 1px solid #f2f2f7; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+    .resident-select-item:last-child { border-bottom: none; }
+    .resident-select-item:hover { background: #f5f5f7; }
+    .resident-select-item.selected { background: #f0f7ff; }
+    .resident-select-item .r-name { font-size: 14px; font-weight: 500; }
+    .resident-select-item .r-meta { font-size: 12px; color: #6e6e73; margin-top: 2px; }
+    .resident-select-item .r-check { font-size: 18px; color: #007aff; }
+
     .camera-area { border: 2px dashed #c7c7cc; border-radius: 12px; padding: 32px 16px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #fff; }
     .camera-area .icon { font-size: 48px; margin-bottom: 10px; }
     .camera-area strong { font-size: 16px; color: #1d1d1f; display: block; margin-bottom: 6px; }
@@ -33,7 +48,7 @@
     .result-header h3 { font-size: 16px; font-weight: 600; }
     .badge { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #e8f4fd; color: #007aff; font-weight: 500; }
     .cat-section { margin-bottom: 12px; }
-    .cat-header { font-size: 13px; font-weight: 600; color: #6e6e73; padding: 8px 0 6px; display: flex; align-items: center; gap: 6px; }
+    .cat-header { font-size: 13px; font-weight: 600; color: #6e6e73; padding: 8px 0 6px; }
     .items-card { background: #fff; border-radius: 12px; padding: 0 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .item-row { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid #f2f2f7; }
     .item-row:last-child { border-bottom: none; }
@@ -69,6 +84,10 @@
     .tip-box { background: #f0f7ff; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 13px; color: #007aff; }
     .error-msg { background: #fff2f2; border: 1px solid #ffcccc; border-radius: 10px; padding: 12px; font-size: 13px; color: #cc0000; margin-top: 12px; }
     .success-msg { background: #f0fff4; border: 1px solid #b7f5d0; border-radius: 10px; padding: 12px; font-size: 13px; color: #007a3d; margin-top: 12px; }
+    .selected-resident-box { background: #f0f7ff; border: 1.5px solid #007aff; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+    .selected-resident-box .info { font-size: 14px; font-weight: 500; color: #007aff; }
+    .selected-resident-box .info small { display: block; font-size: 12px; color: #6e6e73; font-weight: 400; margin-top: 2px; }
+    .selected-resident-box button { font-size: 12px; color: #6e6e73; background: none; border: none; cursor: pointer; }
     @media print {
       body { background: #fff; }
       .header, .tabs, .content { display: none; }
@@ -94,17 +113,38 @@
 </div>
 <div class="content">
   <div id="tab-scan">
+    <!-- 施設名 -->
     <div class="card">
       <label>施設名</label>
-      <input type="text" id="facility-name" placeholder="例：さくら苑" style="margin-bottom:14px;">
-      <label>入所者名</label>
-      <input type="text" id="resident-name" placeholder="例：山田 花子" style="margin-bottom:14px;">
-      <label>部屋番号</label>
-      <input type="text" id="room-number" placeholder="例：203号室">
+      <input type="text" id="facility-name" placeholder="例：さくら苑" oninput="onFacilityChange()">
     </div>
+
+    <!-- 新規 or 既存選択 -->
+    <div class="mode-toggle">
+      <div class="mode-btn active" id="mode-new" onclick="setMode('new')">＋ 新規登録</div>
+      <div class="mode-btn" id="mode-existing" onclick="setMode('existing')">👤 既存の入居者を選択</div>
+    </div>
+
+    <!-- 新規登録フォーム -->
+    <div id="form-new">
+      <div class="card">
+        <label>入所者名</label>
+        <input type="text" id="resident-name" placeholder="例：山田 花子">
+        <label>部屋番号</label>
+        <input type="text" id="room-number" placeholder="例：203号室">
+      </div>
+    </div>
+
+    <!-- 既存選択 -->
+    <div id="form-existing" style="display:none;">
+      <div id="selected-resident-box" style="display:none;"></div>
+      <div id="resident-select-list" class="resident-select-list"></div>
+    </div>
+
     <div class="tip-box">
-      💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます。カテゴリーは自動で判定します。
+      💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます
     </div>
+
     <div class="camera-area" onclick="document.getElementById('file-input').click()">
       <div class="icon">📷</div>
       <strong>写真を撮影・選択</strong>
@@ -137,19 +177,21 @@
         <button onclick="addManualItem()">追加</button>
       </div>
       <div class="action-btns">
-        <button class="btn-primary" onclick="saveResident()" style="font-size:14px; padding:12px;">クラウドに保存する</button>
+        <button class="btn-primary" id="save-btn" onclick="saveResident()" style="font-size:14px; padding:12px;">クラウドに保存する</button>
         <button class="btn-secondary" onclick="printList()">印刷プレビュー</button>
       </div>
     </div>
   </div>
+
   <div id="tab-list" style="display:none;">
     <div class="facility-filter">
-      <input type="text" id="filter-facility" placeholder="施設名で絞り込み">
+      <input type="text" id="filter-facility" placeholder="施設名で絞り込み（空欄で全件）">
       <button onclick="loadResidents()">検索</button>
     </div>
     <div id="residents-container"><div class="empty"><div class="icon">👥</div>検索ボタンを押して一覧を表示</div></div>
   </div>
 </div>
+
 <div class="modal" id="print-modal">
   <div class="modal-inner">
     <div class="modal-header">
@@ -159,6 +201,7 @@
     <div id="print-content"></div>
   </div>
 </div>
+
 <script>
 const CATEGORIES = {
   '衣類':      { icon:'👕' },
@@ -171,6 +214,9 @@ const CATEGORIES = {
 
 let currentImage = null;
 let currentItems = [];
+let currentMode = 'new';
+let selectedResident = null;
+let residentsList = [];
 
 function showTab(tab) {
   document.getElementById('tab-scan').style.display = tab === 'scan' ? 'block' : 'none';
@@ -179,6 +225,77 @@ function showTab(tab) {
     t.classList.toggle('active', (tab==='scan'&&i===0)||(tab==='list'&&i===1));
   });
   if (tab === 'list') loadResidents();
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  selectedResident = null;
+  document.getElementById('mode-new').classList.toggle('active', mode === 'new');
+  document.getElementById('mode-existing').classList.toggle('active', mode === 'existing');
+  document.getElementById('form-new').style.display = mode === 'new' ? 'block' : 'none';
+  document.getElementById('form-existing').style.display = mode === 'existing' ? 'block' : 'none';
+  if (mode === 'existing') loadResidentSelect();
+}
+
+async function onFacilityChange() {
+  if (currentMode === 'existing') loadResidentSelect();
+}
+
+async function loadResidentSelect() {
+  const facility = document.getElementById('facility-name').value.trim();
+  const list = document.getElementById('resident-select-list');
+  list.innerHTML = '<div style="padding:12px; text-align:center; color:#6e6e73; font-size:13px;">読み込み中...</div>';
+  try {
+    let url = '/api/residents';
+    if (facility) url += `?facility=${encodeURIComponent(facility)}`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    residentsList = data;
+    if (data.length === 0) {
+      list.innerHTML = '<div style="padding:12px; text-align:center; color:#6e6e73; font-size:13px;">登録された入居者がいません</div>';
+      return;
+    }
+    list.innerHTML = data.map(r => {
+      const items = JSON.parse(r.items || '[]');
+      const total = items.reduce((s,i)=>s+i.count,0);
+      return `<div class="resident-select-item" id="ritem-${r.id}" onclick="selectResident(${r.id})">
+        <div>
+          <div class="r-name">${r.resident_name}</div>
+          <div class="r-meta">${r.facility_name?r.facility_name+'　':''}${r.room_number?r.room_number+'　':''}${total}点登録済み</div>
+        </div>
+        <div class="r-check" style="display:none;">✓</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = `<div style="padding:12px; color:#cc0000; font-size:13px;">読み込みに失敗しました</div>`;
+  }
+}
+
+function selectResident(id) {
+  selectedResident = residentsList.find(r => r.id === id);
+  document.querySelectorAll('.resident-select-item').forEach(el => {
+    el.classList.remove('selected');
+    el.querySelector('.r-check').style.display = 'none';
+  });
+  const el = document.getElementById(`ritem-${id}`);
+  if (el) {
+    el.classList.add('selected');
+    el.querySelector('.r-check').style.display = 'block';
+  }
+  const box = document.getElementById('selected-resident-box');
+  const items = JSON.parse(selectedResident.items || '[]');
+  const total = items.reduce((s,i)=>s+i.count,0);
+  box.style.display = 'flex';
+  box.innerHTML = `<div class="info">${selectedResident.resident_name}<small>${selectedResident.facility_name?selectedResident.facility_name+'　':''}${selectedResident.room_number?selectedResident.room_number+'　':''}現在${total}点登録済み</small></div><button onclick="clearSelection()">解除</button>`;
+}
+
+function clearSelection() {
+  selectedResident = null;
+  document.getElementById('selected-resident-box').style.display = 'none';
+  document.querySelectorAll('.resident-select-item').forEach(el => {
+    el.classList.remove('selected');
+    el.querySelector('.r-check').style.display = 'none';
+  });
 }
 
 function handleImage(e) {
@@ -204,10 +321,8 @@ async function analyzeImage() {
   document.getElementById('analyze-btn').disabled = true;
   document.getElementById('result-area').style.display = 'none';
   document.getElementById('error-area').innerHTML = '';
-
   const base64 = currentImage.split(',')[1];
   const mediaType = currentImage.split(';')[0].split(':')[1];
-
   try {
     const resp = await fetch('/api/analyze', {
       method: 'POST',
@@ -271,12 +386,21 @@ function addManualItem() {
 
 async function saveResident() {
   const facility = document.getElementById('facility-name').value.trim();
-  const name = document.getElementById('resident-name').value.trim();
-  const room = document.getElementById('room-number').value.trim();
+  let name, room, residentId;
+
+  if (currentMode === 'existing' && selectedResident) {
+    name = selectedResident.resident_name;
+    room = selectedResident.room_number;
+    residentId = selectedResident.id;
+  } else {
+    name = document.getElementById('resident-name').value.trim();
+    room = document.getElementById('room-number').value.trim();
+  }
+
   if (!name) { alert('入所者名を入力してください'); return; }
   if (currentItems.length === 0) { alert('持ち物が登録されていません'); return; }
 
-  const btn = document.querySelector('.action-btns .btn-primary');
+  const btn = document.getElementById('save-btn');
   btn.disabled = true;
   btn.textContent = '保存中...';
 
@@ -289,15 +413,19 @@ async function saveResident() {
         resident_name: name,
         room_number: room,
         items: currentItems,
-        registered_date: new Date().toLocaleDateString('ja-JP')
+        registered_date: new Date().toLocaleDateString('ja-JP'),
+        resident_id: residentId
       })
     });
     if (!resp.ok) { const err = await resp.json(); throw new Error(err.error); }
-    document.getElementById('error-area').innerHTML = '<div class="success-msg">✅ クラウドに保存しました！</div>';
+    const result = await resp.json();
+    const msg = result.merged ? '既存のリストに追加して保存しました！' : '新規登録しました！';
+    document.getElementById('error-area').innerHTML = `<div class="success-msg">✅ ${msg}</div>`;
     document.getElementById('result-area').style.display = 'none';
     document.getElementById('preview').style.display = 'none';
     document.getElementById('analyze-btn').disabled = true;
     currentImage = null; currentItems = [];
+    if (currentMode === 'existing') { clearSelection(); loadResidentSelect(); }
   } catch(e) {
     document.getElementById('error-area').innerHTML = `<div class="error-msg">⚠️ 保存に失敗しました：${e.message}</div>`;
   }
@@ -308,27 +436,24 @@ async function saveResident() {
 async function loadResidents() {
   const facility = document.getElementById('filter-facility').value.trim();
   const container = document.getElementById('residents-container');
-  container.innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto;"></div></div>';
-
+  container.innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto;width:28px;height:28px;border-width:3px;"></div></div>';
   try {
     let url = '/api/residents';
     if (facility) url += `?facility=${encodeURIComponent(facility)}`;
     const resp = await fetch(url);
     if (!resp.ok) throw new Error('取得に失敗しました');
     const data = await resp.json();
-
     if (data.length === 0) {
       container.innerHTML = '<div class="empty"><div class="icon">👥</div>登録されていません</div>';
       return;
     }
-
     container.innerHTML = data.map(r => {
       const items = JSON.parse(r.items || '[]');
       const cats = [...new Set(items.map(i=>i.category))];
       const total = items.reduce((s,i)=>s+i.count,0);
       return `<div class="resident-card" onclick="viewResident(${r.id}, '${encodeURIComponent(JSON.stringify(r))}')">
         <div>
-          ${r.facility_name ? `<div class="facility-tag">🏥 ${r.facility_name}</div>` : ''}
+          ${r.facility_name?`<span class="facility-tag">🏥 ${r.facility_name}</span>`:''}
           <div class="resident-name">${r.resident_name}</div>
           <div class="resident-meta">${r.room_number?r.room_number+'　':''}${r.registered_date}　${total}点</div>
           <div class="resident-cats">${cats.map(c=>`<span class="cat-tag">${CATEGORIES[c]?.icon||'📦'} ${c}</span>`).join('')}</div>
@@ -369,7 +494,7 @@ function viewResident(id, encoded) {
     <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #e5e5ea;">
       ${r.facility_name?`<p style="font-size:13px; color:#007aff; margin-bottom:4px;">🏥 ${r.facility_name}</p>`:''}
       <p style="font-size:17px; font-weight:600;">${r.resident_name}</p>
-      <p style="font-size:13px; color:#6e6e73;">${r.room_number?r.room_number+'　':''}登録日：${r.registered_date}　合計 ${total} 点</p>
+      <p style="font-size:13px; color:#6e6e73;">${r.room_number?r.room_number+'　':''}更新日：${r.registered_date}　合計 ${total} 点</p>
     </div>
     ${buildTable(items)}
     <p style="text-align:right; font-size:12px; color:#6e6e73; margin-top:10px;">合計 ${total} 点</p>
@@ -380,8 +505,8 @@ function viewResident(id, encoded) {
 }
 
 function printList() {
-  const name = document.getElementById('resident-name').value.trim()||'未設定';
-  const room = document.getElementById('room-number').value.trim();
+  const name = currentMode === 'existing' && selectedResident ? selectedResident.resident_name : (document.getElementById('resident-name').value.trim()||'未設定');
+  const room = currentMode === 'existing' && selectedResident ? selectedResident.room_number : document.getElementById('room-number').value.trim();
   const facility = document.getElementById('facility-name').value.trim();
   const total = currentItems.reduce((s,i)=>s+i.count,0);
   document.getElementById('modal-title').textContent = name + 'さんの持ち物';
