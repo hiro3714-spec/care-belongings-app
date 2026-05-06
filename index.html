@@ -18,11 +18,9 @@
     .card label { font-size: 12px; color: #6e6e73; display: block; margin-bottom: 6px; }
     .card input, .card select { width: 100%; font-size: 15px; border: none; outline: none; padding: 6px 0; border-bottom: 1px solid #e5e5ea; background: transparent; margin-bottom: 14px; }
     .card input:last-child, .card select:last-child { margin-bottom: 0; }
-
     .mode-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
     .mode-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1.5px solid #e5e5ea; background: #fff; font-size: 13px; cursor: pointer; text-align: center; color: #6e6e73; font-weight: 500; }
     .mode-btn.active { border-color: #007aff; color: #007aff; background: #f0f7ff; }
-
     .resident-select-list { max-height: 200px; overflow-y: auto; border: 1px solid #e5e5ea; border-radius: 10px; margin-bottom: 12px; }
     .resident-select-item { padding: 12px 14px; border-bottom: 1px solid #f2f2f7; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
     .resident-select-item:last-child { border-bottom: none; }
@@ -31,7 +29,6 @@
     .resident-select-item .r-name { font-size: 14px; font-weight: 500; }
     .resident-select-item .r-meta { font-size: 12px; color: #6e6e73; margin-top: 2px; }
     .resident-select-item .r-check { font-size: 18px; color: #007aff; }
-
     .camera-area { border: 2px dashed #c7c7cc; border-radius: 12px; padding: 32px 16px; text-align: center; cursor: pointer; margin-bottom: 12px; background: #fff; }
     .camera-area .icon { font-size: 48px; margin-bottom: 10px; }
     .camera-area strong { font-size: 16px; color: #1d1d1f; display: block; margin-bottom: 6px; }
@@ -40,6 +37,7 @@
     .btn-primary { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 12px; background: #007aff; color: #fff; border: none; }
     .btn-primary:disabled { background: #c7c7cc; cursor: not-allowed; }
     .btn-secondary { width: 100%; padding: 12px; font-size: 14px; cursor: pointer; border-radius: 12px; background: #f5f5f7; color: #007aff; border: none; font-weight: 500; }
+    .btn-danger { width: 100%; padding: 12px; font-size: 14px; cursor: pointer; border-radius: 12px; background: #fff2f2; color: #ff3b30; border: 1px solid #ffcccc; font-weight: 500; }
     .loading { text-align: center; padding: 32px; display: none; }
     .loading p { font-size: 14px; color: #6e6e73; margin-top: 10px; }
     .spinner { width: 32px; height: 32px; border: 3px solid #e5e5ea; border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
@@ -58,6 +56,7 @@
     .item-detail { font-size: 12px; color: #6e6e73; margin-top: 2px; }
     .item-count { font-size: 13px; color: #6e6e73; white-space: nowrap; }
     .item-del { font-size: 20px; color: #c7c7cc; cursor: pointer; padding: 4px; line-height: 1; }
+    .item-del:hover { color: #ff3b30; }
     .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
     .add-row input { flex: 1; font-size: 14px; padding: 10px 12px; border: 1px solid #e5e5ea; border-radius: 10px; outline: none; background: #fff; }
     .add-row select { font-size: 13px; padding: 10px 8px; border: 1px solid #e5e5ea; border-radius: 10px; outline: none; background: #fff; }
@@ -81,6 +80,10 @@
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .modal-header h2 { font-size: 17px; font-weight: 600; }
     .modal-close { font-size: 14px; color: #007aff; cursor: pointer; padding: 4px 8px; }
+    .detail-item-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f2f2f7; }
+    .detail-item-row:last-child { border-bottom: none; }
+    .detail-item-del { font-size: 18px; color: #c7c7cc; cursor: pointer; padding: 4px; }
+    .detail-item-del:hover { color: #ff3b30; }
     .tip-box { background: #f0f7ff; border-radius: 10px; padding: 12px; margin-bottom: 12px; font-size: 13px; color: #007aff; }
     .error-msg { background: #fff2f2; border: 1px solid #ffcccc; border-radius: 10px; padding: 12px; font-size: 13px; color: #cc0000; margin-top: 12px; }
     .success-msg { background: #f0fff4; border: 1px solid #b7f5d0; border-radius: 10px; padding: 12px; font-size: 13px; color: #007a3d; margin-top: 12px; }
@@ -88,6 +91,9 @@
     .selected-resident-box .info { font-size: 14px; font-weight: 500; color: #007aff; }
     .selected-resident-box .info small { display: block; font-size: 12px; color: #6e6e73; font-weight: 400; margin-top: 2px; }
     .selected-resident-box button { font-size: 12px; color: #6e6e73; background: none; border: none; cursor: pointer; }
+    .edit-mode-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .edit-mode-bar span { font-size: 13px; color: #6e6e73; }
+    .edit-toggle { font-size: 13px; color: #007aff; cursor: pointer; padding: 4px 10px; border: 1px solid #007aff; border-radius: 8px; background: #fff; }
     @media print {
       body { background: #fff; }
       .header, .tabs, .content { display: none; }
@@ -100,6 +106,7 @@
     td { padding: 8px 6px; border-bottom: 1px solid #e5e5ea; }
     .color-dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; border: 1px solid #e5e5ea; vertical-align: middle; margin-right: 5px; }
     .print-cat-title { font-size: 13px; font-weight: 600; color: #6e6e73; margin: 14px 0 6px; }
+    .divider { height: 1px; background: #e5e5ea; margin: 14px 0; }
   </style>
 </head>
 <body>
@@ -113,19 +120,14 @@
 </div>
 <div class="content">
   <div id="tab-scan">
-    <!-- 施設名 -->
     <div class="card">
       <label>施設名</label>
       <input type="text" id="facility-name" placeholder="例：さくら苑" oninput="onFacilityChange()">
     </div>
-
-    <!-- 新規 or 既存選択 -->
     <div class="mode-toggle">
       <div class="mode-btn active" id="mode-new" onclick="setMode('new')">＋ 新規登録</div>
       <div class="mode-btn" id="mode-existing" onclick="setMode('existing')">👤 既存の入居者を選択</div>
     </div>
-
-    <!-- 新規登録フォーム -->
     <div id="form-new">
       <div class="card">
         <label>入所者名</label>
@@ -134,17 +136,11 @@
         <input type="text" id="room-number" placeholder="例：203号室">
       </div>
     </div>
-
-    <!-- 既存選択 -->
     <div id="form-existing" style="display:none;">
       <div id="selected-resident-box" style="display:none;"></div>
       <div id="resident-select-list" class="resident-select-list"></div>
     </div>
-
-    <div class="tip-box">
-      💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます
-    </div>
-
+    <div class="tip-box">💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます</div>
     <div class="camera-area" onclick="document.getElementById('file-input').click()">
       <div class="icon">📷</div>
       <strong>写真を撮影・選択</strong>
@@ -153,10 +149,7 @@
     <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)" style="display:none;">
     <img id="preview" class="preview-img">
     <button class="btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AIで持ち物を一括解析する</button>
-    <div class="loading" id="loading">
-      <div class="spinner"></div>
-      <p>AIが全ての持ち物を解析中...</p>
-    </div>
+    <div class="loading" id="loading"><div class="spinner"></div><p>AIが全ての持ち物を解析中...</p></div>
     <div id="error-area"></div>
     <div id="result-area" style="display:none;">
       <div class="result-header">
@@ -192,10 +185,22 @@
   </div>
 </div>
 
+<!-- 詳細モーダル -->
+<div class="modal" id="detail-modal">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2 id="detail-title">詳細</h2>
+      <span class="modal-close" onclick="closeDetailModal()">閉じる</span>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- 印刷モーダル -->
 <div class="modal" id="print-modal">
   <div class="modal-inner">
     <div class="modal-header">
-      <h2 id="modal-title">詳細・印刷</h2>
+      <h2 id="modal-title">印刷プレビュー</h2>
       <span class="modal-close" onclick="closeModal()">閉じる</span>
     </div>
     <div id="print-content"></div>
@@ -203,255 +208,173 @@
 </div>
 
 <script>
-const CATEGORIES = {
-  '衣類':      { icon:'👕' },
-  '日用品':    { icon:'🪥' },
-  '貴重品':    { icon:'💼' },
-  '電化製品':  { icon:'📺' },
-  '趣味・娯楽':{ icon:'📚' },
-  '医療用品':  { icon:'👓' },
-};
-
-let currentImage = null;
-let currentItems = [];
-let currentMode = 'new';
-let selectedResident = null;
-let residentsList = [];
+const CATEGORIES = { '衣類':{icon:'👕'}, '日用品':{icon:'🪥'}, '貴重品':{icon:'💼'}, '電化製品':{icon:'📺'}, '趣味・娯楽':{icon:'📚'}, '医療用品':{icon:'👓'} };
+let currentImage=null, currentItems=[], currentMode='new', selectedResident=null, residentsList=[];
+let detailResident=null, detailItems=[], editMode=false;
 
 function showTab(tab) {
-  document.getElementById('tab-scan').style.display = tab === 'scan' ? 'block' : 'none';
-  document.getElementById('tab-list').style.display = tab === 'list' ? 'block' : 'none';
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', (tab==='scan'&&i===0)||(tab==='list'&&i===1));
-  });
-  if (tab === 'list') loadResidents();
+  document.getElementById('tab-scan').style.display = tab==='scan'?'block':'none';
+  document.getElementById('tab-list').style.display = tab==='list'?'block':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',(tab==='scan'&&i===0)||(tab==='list'&&i===1)));
+  if(tab==='list') loadResidents();
 }
 
 function setMode(mode) {
-  currentMode = mode;
-  selectedResident = null;
-  document.getElementById('mode-new').classList.toggle('active', mode === 'new');
-  document.getElementById('mode-existing').classList.toggle('active', mode === 'existing');
-  document.getElementById('form-new').style.display = mode === 'new' ? 'block' : 'none';
-  document.getElementById('form-existing').style.display = mode === 'existing' ? 'block' : 'none';
-  if (mode === 'existing') loadResidentSelect();
+  currentMode=mode; selectedResident=null;
+  document.getElementById('mode-new').classList.toggle('active',mode==='new');
+  document.getElementById('mode-existing').classList.toggle('active',mode==='existing');
+  document.getElementById('form-new').style.display=mode==='new'?'block':'none';
+  document.getElementById('form-existing').style.display=mode==='existing'?'block':'none';
+  if(mode==='existing') loadResidentSelect();
 }
 
-async function onFacilityChange() {
-  if (currentMode === 'existing') loadResidentSelect();
-}
+async function onFacilityChange() { if(currentMode==='existing') loadResidentSelect(); }
 
 async function loadResidentSelect() {
-  const facility = document.getElementById('facility-name').value.trim();
-  const list = document.getElementById('resident-select-list');
-  list.innerHTML = '<div style="padding:12px; text-align:center; color:#6e6e73; font-size:13px;">読み込み中...</div>';
+  const facility=document.getElementById('facility-name').value.trim();
+  const list=document.getElementById('resident-select-list');
+  list.innerHTML='<div style="padding:12px;text-align:center;color:#6e6e73;font-size:13px;">読み込み中...</div>';
   try {
-    let url = '/api/residents';
-    if (facility) url += `?facility=${encodeURIComponent(facility)}`;
-    const resp = await fetch(url);
-    const data = await resp.json();
-    residentsList = data;
-    if (data.length === 0) {
-      list.innerHTML = '<div style="padding:12px; text-align:center; color:#6e6e73; font-size:13px;">登録された入居者がいません</div>';
-      return;
-    }
-    list.innerHTML = data.map(r => {
-      const items = JSON.parse(r.items || '[]');
-      const total = items.reduce((s,i)=>s+i.count,0);
+    let url='/api/residents';
+    if(facility) url+=`?facility=${encodeURIComponent(facility)}`;
+    const resp=await fetch(url);
+    const data=await resp.json();
+    residentsList=data;
+    if(data.length===0){list.innerHTML='<div style="padding:12px;text-align:center;color:#6e6e73;font-size:13px;">登録された入居者がいません</div>';return;}
+    list.innerHTML=data.map(r=>{
+      const items=JSON.parse(r.items||'[]');
+      const total=items.reduce((s,i)=>s+i.count,0);
       return `<div class="resident-select-item" id="ritem-${r.id}" onclick="selectResident(${r.id})">
-        <div>
-          <div class="r-name">${r.resident_name}</div>
-          <div class="r-meta">${r.facility_name?r.facility_name+'　':''}${r.room_number?r.room_number+'　':''}${total}点登録済み</div>
-        </div>
-        <div class="r-check" style="display:none;">✓</div>
-      </div>`;
+        <div><div class="r-name">${r.resident_name}</div><div class="r-meta">${r.facility_name?r.facility_name+'　':''}${r.room_number?r.room_number+'　':''}${total}点登録済み</div></div>
+        <div class="r-check" style="display:none;">✓</div></div>`;
     }).join('');
-  } catch(e) {
-    list.innerHTML = `<div style="padding:12px; color:#cc0000; font-size:13px;">読み込みに失敗しました</div>`;
-  }
+  } catch(e){list.innerHTML='<div style="padding:12px;color:#cc0000;font-size:13px;">読み込みに失敗しました</div>';}
 }
 
 function selectResident(id) {
-  selectedResident = residentsList.find(r => r.id === id);
-  document.querySelectorAll('.resident-select-item').forEach(el => {
-    el.classList.remove('selected');
-    el.querySelector('.r-check').style.display = 'none';
-  });
-  const el = document.getElementById(`ritem-${id}`);
-  if (el) {
-    el.classList.add('selected');
-    el.querySelector('.r-check').style.display = 'block';
-  }
-  const box = document.getElementById('selected-resident-box');
-  const items = JSON.parse(selectedResident.items || '[]');
-  const total = items.reduce((s,i)=>s+i.count,0);
-  box.style.display = 'flex';
-  box.innerHTML = `<div class="info">${selectedResident.resident_name}<small>${selectedResident.facility_name?selectedResident.facility_name+'　':''}${selectedResident.room_number?selectedResident.room_number+'　':''}現在${total}点登録済み</small></div><button onclick="clearSelection()">解除</button>`;
+  selectedResident=residentsList.find(r=>r.id===id);
+  document.querySelectorAll('.resident-select-item').forEach(el=>{el.classList.remove('selected');el.querySelector('.r-check').style.display='none';});
+  const el=document.getElementById(`ritem-${id}`);
+  if(el){el.classList.add('selected');el.querySelector('.r-check').style.display='block';}
+  const box=document.getElementById('selected-resident-box');
+  const items=JSON.parse(selectedResident.items||'[]');
+  const total=items.reduce((s,i)=>s+i.count,0);
+  box.style.display='flex';
+  box.innerHTML=`<div class="info">${selectedResident.resident_name}<small>${selectedResident.facility_name?selectedResident.facility_name+'　':''}${selectedResident.room_number?selectedResident.room_number+'　':''}現在${total}点登録済み</small></div><button onclick="clearSelection()">解除</button>`;
 }
 
 function clearSelection() {
-  selectedResident = null;
-  document.getElementById('selected-resident-box').style.display = 'none';
-  document.querySelectorAll('.resident-select-item').forEach(el => {
-    el.classList.remove('selected');
-    el.querySelector('.r-check').style.display = 'none';
-  });
+  selectedResident=null;
+  document.getElementById('selected-resident-box').style.display='none';
+  document.querySelectorAll('.resident-select-item').forEach(el=>{el.classList.remove('selected');el.querySelector('.r-check').style.display='none';});
 }
 
 function handleImage(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    currentImage = ev.target.result;
-    const prev = document.getElementById('preview');
-    prev.src = currentImage;
-    prev.style.display = 'block';
-    document.getElementById('analyze-btn').disabled = false;
-    document.getElementById('result-area').style.display = 'none';
-    document.getElementById('error-area').innerHTML = '';
-    currentItems = [];
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    currentImage=ev.target.result;
+    document.getElementById('preview').src=currentImage;
+    document.getElementById('preview').style.display='block';
+    document.getElementById('analyze-btn').disabled=false;
+    document.getElementById('result-area').style.display='none';
+    document.getElementById('error-area').innerHTML='';
+    currentItems=[];
   };
   reader.readAsDataURL(file);
 }
 
 async function analyzeImage() {
-  if (!currentImage) return;
-  document.getElementById('loading').style.display = 'block';
-  document.getElementById('analyze-btn').disabled = true;
-  document.getElementById('result-area').style.display = 'none';
-  document.getElementById('error-area').innerHTML = '';
-  const base64 = currentImage.split(',')[1];
-  const mediaType = currentImage.split(';')[0].split(':')[1];
+  if(!currentImage) return;
+  document.getElementById('loading').style.display='block';
+  document.getElementById('analyze-btn').disabled=true;
+  document.getElementById('result-area').style.display='none';
+  document.getElementById('error-area').innerHTML='';
+  const base64=currentImage.split(',')[1];
+  const mediaType=currentImage.split(';')[0].split(':')[1];
   try {
-    const resp = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64, mediaType })
-    });
-    if (!resp.ok) { const err = await resp.json(); throw new Error(err.error); }
-    const data = await resp.json();
-    currentItems = data.items || [];
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:base64,mediaType})});
+    if(!resp.ok){const err=await resp.json();throw new Error(err.error);}
+    const data=await resp.json();
+    currentItems=data.items||[];
     renderItems();
-    document.getElementById('result-area').style.display = 'block';
-  } catch(e) {
-    document.getElementById('error-area').innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
-  }
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('analyze-btn').disabled = false;
+    document.getElementById('result-area').style.display='block';
+  } catch(e){document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ ${e.message}</div>`;}
+  document.getElementById('loading').style.display='none';
+  document.getElementById('analyze-btn').disabled=false;
 }
 
 function renderItems() {
-  const container = document.getElementById('items-by-category');
-  document.getElementById('item-count-badge').textContent = currentItems.length + '点';
-  const grouped = {};
-  currentItems.forEach((item, i) => {
-    const cat = item.category || 'その他';
-    if (!grouped[cat]) grouped[cat] = [];
-    grouped[cat].push({ ...item, _idx: i });
-  });
-  if (currentItems.length === 0) {
-    container.innerHTML = '<div class="items-card"><div style="padding:16px; text-align:center; color:#6e6e73; font-size:14px;">持ち物が検出されませんでした</div></div>';
-    return;
-  }
-  container.innerHTML = Object.entries(grouped).map(([cat, items]) => `
+  const container=document.getElementById('items-by-category');
+  document.getElementById('item-count-badge').textContent=currentItems.length+'点';
+  const grouped={};
+  currentItems.forEach((item,i)=>{const cat=item.category||'その他';if(!grouped[cat])grouped[cat]=[];grouped[cat].push({...item,_idx:i});});
+  if(currentItems.length===0){container.innerHTML='<div class="items-card"><div style="padding:16px;text-align:center;color:#6e6e73;font-size:14px;">持ち物が検出されませんでした</div></div>';return;}
+  container.innerHTML=Object.entries(grouped).map(([cat,items])=>`
     <div class="cat-section">
       <div class="cat-header">${CATEGORIES[cat]?.icon||'📦'} ${cat}（${items.length}点）</div>
-      <div class="items-card">
-        ${items.map(item => `
-          <div class="item-row">
-            <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
-            <div class="item-info">
-              <div class="item-name">${item.name}</div>
-              <div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'', item.note||''].filter(Boolean).join('　')}</div>
-            </div>
-            <div class="item-count">${item.count}点</div>
-            <div class="item-del" onclick="removeItem(${item._idx})">×</div>
-          </div>`).join('')}
+      <div class="items-card">${items.map(item=>`
+        <div class="item-row">
+          <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
+          <div class="item-info"><div class="item-name">${item.name}</div><div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'',item.note||''].filter(Boolean).join('　')}</div></div>
+          <div class="item-count">${item.count}点</div>
+          <div class="item-del" onclick="removeItem(${item._idx})">×</div>
+        </div>`).join('')}
       </div>
     </div>`).join('');
 }
 
-function removeItem(i) { currentItems.splice(i,1); renderItems(); }
+function removeItem(i){currentItems.splice(i,1);renderItems();}
 
 function addManualItem() {
-  const input = document.getElementById('new-item');
-  const cat = document.getElementById('new-cat').value;
-  const val = input.value.trim();
-  if (!val) return;
-  currentItems.push({ category: cat, name: val, color:'', colorCode:'#888', count:1, note:'' });
-  renderItems();
-  input.value = '';
+  const input=document.getElementById('new-item');
+  const cat=document.getElementById('new-cat').value;
+  const val=input.value.trim();
+  if(!val) return;
+  currentItems.push({category:cat,name:val,color:'',colorCode:'#888',count:1,note:''});
+  renderItems(); input.value='';
 }
 
 async function saveResident() {
-  const facility = document.getElementById('facility-name').value.trim();
-  let name, room, residentId;
-
-  if (currentMode === 'existing' && selectedResident) {
-    name = selectedResident.resident_name;
-    room = selectedResident.room_number;
-    residentId = selectedResident.id;
-  } else {
-    name = document.getElementById('resident-name').value.trim();
-    room = document.getElementById('room-number').value.trim();
-  }
-
-  if (!name) { alert('入所者名を入力してください'); return; }
-  if (currentItems.length === 0) { alert('持ち物が登録されていません'); return; }
-
-  const btn = document.getElementById('save-btn');
-  btn.disabled = true;
-  btn.textContent = '保存中...';
-
+  const facility=document.getElementById('facility-name').value.trim();
+  let name,room,residentId;
+  if(currentMode==='existing'&&selectedResident){name=selectedResident.resident_name;room=selectedResident.room_number;residentId=selectedResident.id;}
+  else{name=document.getElementById('resident-name').value.trim();room=document.getElementById('room-number').value.trim();}
+  if(!name){alert('入所者名を入力してください');return;}
+  if(currentItems.length===0){alert('持ち物が登録されていません');return;}
+  const btn=document.getElementById('save-btn');
+  btn.disabled=true; btn.textContent='保存中...';
   try {
-    const resp = await fetch('/api/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        facility_name: facility,
-        resident_name: name,
-        room_number: room,
-        items: currentItems,
-        registered_date: new Date().toLocaleDateString('ja-JP'),
-        resident_id: residentId
-      })
-    });
-    if (!resp.ok) { const err = await resp.json(); throw new Error(err.error); }
-    const result = await resp.json();
-    const msg = result.merged ? '既存のリストに追加して保存しました！' : '新規登録しました！';
-    document.getElementById('error-area').innerHTML = `<div class="success-msg">✅ ${msg}</div>`;
-    document.getElementById('result-area').style.display = 'none';
-    document.getElementById('preview').style.display = 'none';
-    document.getElementById('analyze-btn').disabled = true;
-    currentImage = null; currentItems = [];
-    if (currentMode === 'existing') { clearSelection(); loadResidentSelect(); }
-  } catch(e) {
-    document.getElementById('error-area').innerHTML = `<div class="error-msg">⚠️ 保存に失敗しました：${e.message}</div>`;
-  }
-  btn.disabled = false;
-  btn.textContent = 'クラウドに保存する';
+    const resp=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({facility_name:facility,resident_name:name,room_number:room,items:currentItems,registered_date:new Date().toLocaleDateString('ja-JP'),resident_id:residentId})});
+    if(!resp.ok){const err=await resp.json();throw new Error(err.error);}
+    const result=await resp.json();
+    const msg=result.merged?'既存のリストに追加して保存しました！':'新規登録しました！';
+    document.getElementById('error-area').innerHTML=`<div class="success-msg">✅ ${msg}</div>`;
+    document.getElementById('result-area').style.display='none';
+    document.getElementById('preview').style.display='none';
+    document.getElementById('analyze-btn').disabled=true;
+    currentImage=null; currentItems=[];
+    if(currentMode==='existing'){clearSelection();loadResidentSelect();}
+  } catch(e){document.getElementById('error-area').innerHTML=`<div class="error-msg">⚠️ 保存に失敗しました：${e.message}</div>`;}
+  btn.disabled=false; btn.textContent='クラウドに保存する';
 }
 
 async function loadResidents() {
-  const facility = document.getElementById('filter-facility').value.trim();
-  const container = document.getElementById('residents-container');
-  container.innerHTML = '<div class="empty"><div class="spinner" style="margin:0 auto;width:28px;height:28px;border-width:3px;"></div></div>';
+  const facility=document.getElementById('filter-facility').value.trim();
+  const container=document.getElementById('residents-container');
+  container.innerHTML='<div class="empty"><div class="spinner" style="margin:0 auto;width:28px;height:28px;border-width:3px;"></div></div>';
   try {
-    let url = '/api/residents';
-    if (facility) url += `?facility=${encodeURIComponent(facility)}`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error('取得に失敗しました');
-    const data = await resp.json();
-    if (data.length === 0) {
-      container.innerHTML = '<div class="empty"><div class="icon">👥</div>登録されていません</div>';
-      return;
-    }
-    container.innerHTML = data.map(r => {
-      const items = JSON.parse(r.items || '[]');
-      const cats = [...new Set(items.map(i=>i.category))];
-      const total = items.reduce((s,i)=>s+i.count,0);
-      return `<div class="resident-card" onclick="viewResident(${r.id}, '${encodeURIComponent(JSON.stringify(r))}')">
+    let url='/api/residents';
+    if(facility) url+=`?facility=${encodeURIComponent(facility)}`;
+    const resp=await fetch(url);
+    if(!resp.ok) throw new Error('取得に失敗しました');
+    const data=await resp.json();
+    if(data.length===0){container.innerHTML='<div class="empty"><div class="icon">👥</div>登録されていません</div>';return;}
+    container.innerHTML=data.map(r=>{
+      const items=JSON.parse(r.items||'[]');
+      const cats=[...new Set(items.map(i=>i.category))];
+      const total=items.reduce((s,i)=>s+i.count,0);
+      return `<div class="resident-card" onclick="openDetailModal(${r.id},'${encodeURIComponent(JSON.stringify(r))}')">
         <div>
           ${r.facility_name?`<span class="facility-tag">🏥 ${r.facility_name}</span>`:''}
           <div class="resident-name">${r.resident_name}</div>
@@ -461,80 +384,130 @@ async function loadResidents() {
         <div class="resident-arrow">›</div>
       </div>`;
     }).join('');
-  } catch(e) {
-    container.innerHTML = `<div class="error-msg">⚠️ ${e.message}</div>`;
-  }
+  } catch(e){container.innerHTML=`<div class="error-msg">⚠️ ${e.message}</div>`;}
+}
+
+function openDetailModal(id, encoded) {
+  detailResident=JSON.parse(decodeURIComponent(encoded));
+  detailItems=JSON.parse(detailResident.items||'[]');
+  editMode=false;
+  renderDetailModal();
+  document.getElementById('detail-modal').style.display='block';
+}
+
+function renderDetailModal() {
+  const total=detailItems.reduce((s,i)=>s+i.count,0);
+  document.getElementById('detail-title').textContent=detailResident.resident_name+'さんの持ち物';
+  const grouped={};
+  detailItems.forEach((item,i)=>{const cat=item.category||'その他';if(!grouped[cat])grouped[cat]=[];grouped[cat].push({...item,_didx:i});});
+
+  let html=`
+    <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #e5e5ea;">
+      ${detailResident.facility_name?`<p style="font-size:13px;color:#007aff;margin-bottom:4px;">🏥 ${detailResident.facility_name}</p>`:''}
+      <p style="font-size:16px;font-weight:600;">${detailResident.resident_name}</p>
+      <p style="font-size:13px;color:#6e6e73;">${detailResident.room_number?detailResident.room_number+'　':''}更新日：${detailResident.registered_date}　合計 ${total} 点</p>
+    </div>
+    <div class="edit-mode-bar no-print">
+      <span>${editMode?'荷物を削除できます':'詳細を確認・編集できます'}</span>
+      <button class="edit-toggle" onclick="toggleEditMode()">${editMode?'編集終了':'✏️ 荷物を編集・削除'}</button>
+    </div>`;
+
+  html+=Object.entries(grouped).map(([cat,items])=>`
+    <div class="cat-section">
+      <div class="cat-header">${CATEGORIES[cat]?.icon||'📦'} ${cat}（${items.length}点）</div>
+      <div class="items-card">${items.map(item=>`
+        <div class="detail-item-row">
+          <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
+          <div class="item-info"><div class="item-name">${item.name}</div><div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'',item.note||''].filter(Boolean).join('　')}</div></div>
+          <div class="item-count">${item.count}点</div>
+          ${editMode?`<div class="detail-item-del" onclick="removeDetailItem(${item._didx})" title="削除">🗑️</div>`:''}
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  html+=`<div class="divider no-print"></div>
+    <div style="display:flex;gap:8px;" class="no-print">
+      <button class="btn-primary" onclick="printFromDetail()" style="font-size:14px;padding:12px;">印刷する</button>
+    </div>
+    <div style="margin-top:8px;" class="no-print">
+      <button class="btn-danger" onclick="deleteResident(${detailResident.id})">⚠️ この入居者を削除する</button>
+    </div>`;
+
+  document.getElementById('detail-content').innerHTML=html;
+}
+
+function toggleEditMode() {
+  editMode=!editMode;
+  renderDetailModal();
+}
+
+async function removeDetailItem(idx) {
+  if(!confirm('この荷物を削除しますか？')) return;
+  detailItems.splice(idx,1);
+  try {
+    const resp=await fetch('/api/update-items',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:detailResident.id,items:detailItems})});
+    if(!resp.ok) throw new Error('更新に失敗しました');
+    detailResident.items=JSON.stringify(detailItems);
+    renderDetailModal();
+    loadResidents();
+  } catch(e){alert(e.message);}
+}
+
+function printFromDetail() {
+  const total=detailItems.reduce((s,i)=>s+i.count,0);
+  document.getElementById('modal-title').textContent=detailResident.resident_name+'さんの持ち物';
+  document.getElementById('print-content').innerHTML=`
+    <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e5e5ea;">
+      ${detailResident.facility_name?`<p style="font-size:13px;color:#007aff;margin-bottom:4px;">🏥 ${detailResident.facility_name}</p>`:''}
+      <p style="font-size:17px;font-weight:600;">${detailResident.resident_name}</p>
+      <p style="font-size:13px;color:#6e6e73;">${detailResident.room_number?detailResident.room_number+'　':''}更新日：${detailResident.registered_date}　合計 ${total} 点</p>
+    </div>
+    ${buildTable(detailItems)}
+    <p style="text-align:right;font-size:12px;color:#6e6e73;margin-top:10px;">合計 ${total} 点</p>
+    <button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>`;
+  closeDetailModal();
+  document.getElementById('print-modal').style.display='block';
 }
 
 function buildTable(items) {
-  const cats = [...new Set(items.map(i=>i.category))];
-  return cats.map(cat => {
-    const catItems = items.filter(i=>i.category===cat);
+  const cats=[...new Set(items.map(i=>i.category))];
+  return cats.map(cat=>{
+    const catItems=items.filter(i=>i.category===cat);
     return `<div class="print-cat-title">${CATEGORIES[cat]?.icon||'📦'} ${cat}</div>
-    <table>
-      <thead><tr><th>品目</th><th>色・詳細</th><th>数</th><th>備考</th></tr></thead>
-      <tbody>${catItems.map(item=>`
-        <tr>
-          <td>${item.name}</td>
-          <td>${item.color&&item.color!=='なし'?`<span class="color-dot" style="background:${item.colorCode}"></span>${item.color}`:'—'}</td>
-          <td>${item.count}</td>
-          <td style="color:#6e6e73;">${item.note||''}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+    <table><thead><tr><th>品目</th><th>色・詳細</th><th>数</th><th>備考</th></tr></thead>
+    <tbody>${catItems.map(item=>`<tr><td>${item.name}</td><td>${item.color&&item.color!=='なし'?`<span class="color-dot" style="background:${item.colorCode}"></span>${item.color}`:'—'}</td><td>${item.count}</td><td style="color:#6e6e73;">${item.note||''}</td></tr>`).join('')}</tbody></table>`;
   }).join('');
 }
 
-function viewResident(id, encoded) {
-  const r = JSON.parse(decodeURIComponent(encoded));
-  const items = JSON.parse(r.items || '[]');
-  const total = items.reduce((s,i)=>s+i.count,0);
-  document.getElementById('modal-title').textContent = r.resident_name + 'さんの持ち物';
-  document.getElementById('print-content').innerHTML = `
-    <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #e5e5ea;">
-      ${r.facility_name?`<p style="font-size:13px; color:#007aff; margin-bottom:4px;">🏥 ${r.facility_name}</p>`:''}
-      <p style="font-size:17px; font-weight:600;">${r.resident_name}</p>
-      <p style="font-size:13px; color:#6e6e73;">${r.room_number?r.room_number+'　':''}更新日：${r.registered_date}　合計 ${total} 点</p>
-    </div>
-    ${buildTable(items)}
-    <p style="text-align:right; font-size:12px; color:#6e6e73; margin-top:10px;">合計 ${total} 点</p>
-    <button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px; font-size:14px; padding:12px;">印刷する</button>
-    <button class="btn-secondary no-print" onclick="deleteResident(${id})" style="margin-top:8px; color:#ff3b30;">削除する</button>
-  `;
-  document.getElementById('print-modal').style.display = 'block';
-}
-
 function printList() {
-  const name = currentMode === 'existing' && selectedResident ? selectedResident.resident_name : (document.getElementById('resident-name').value.trim()||'未設定');
-  const room = currentMode === 'existing' && selectedResident ? selectedResident.room_number : document.getElementById('room-number').value.trim();
-  const facility = document.getElementById('facility-name').value.trim();
-  const total = currentItems.reduce((s,i)=>s+i.count,0);
-  document.getElementById('modal-title').textContent = name + 'さんの持ち物';
-  document.getElementById('print-content').innerHTML = `
-    <div style="margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid #e5e5ea;">
-      ${facility?`<p style="font-size:13px; color:#007aff; margin-bottom:4px;">🏥 ${facility}</p>`:''}
-      <p style="font-size:17px; font-weight:600;">${name}</p>
-      <p style="font-size:13px; color:#6e6e73;">${room?room+'　':''}${new Date().toLocaleDateString('ja-JP')}　合計 ${total} 点</p>
+  const name=currentMode==='existing'&&selectedResident?selectedResident.resident_name:(document.getElementById('resident-name').value.trim()||'未設定');
+  const room=currentMode==='existing'&&selectedResident?selectedResident.room_number:document.getElementById('room-number').value.trim();
+  const facility=document.getElementById('facility-name').value.trim();
+  const total=currentItems.reduce((s,i)=>s+i.count,0);
+  document.getElementById('modal-title').textContent=name+'さんの持ち物';
+  document.getElementById('print-content').innerHTML=`
+    <div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e5e5ea;">
+      ${facility?`<p style="font-size:13px;color:#007aff;margin-bottom:4px;">🏥 ${facility}</p>`:''}
+      <p style="font-size:17px;font-weight:600;">${name}</p>
+      <p style="font-size:13px;color:#6e6e73;">${room?room+'　':''}${new Date().toLocaleDateString('ja-JP')}　合計 ${total} 点</p>
     </div>
     ${buildTable(currentItems)}
-    <p style="text-align:right; font-size:12px; color:#6e6e73; margin-top:10px;">合計 ${total} 点</p>
-    <button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px; font-size:14px; padding:12px;">印刷する</button>
-  `;
-  document.getElementById('print-modal').style.display = 'block';
+    <p style="text-align:right;font-size:12px;color:#6e6e73;margin-top:10px;">合計 ${total} 点</p>
+    <button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>`;
+  document.getElementById('print-modal').style.display='block';
 }
 
-function closeModal() { document.getElementById('print-modal').style.display='none'; }
+function closeDetailModal(){document.getElementById('detail-modal').style.display='none';}
+function closeModal(){document.getElementById('print-modal').style.display='none';}
 
 async function deleteResident(id) {
-  if (!confirm('削除しますか？この操作は元に戻せません。')) return;
+  if(!confirm('この入居者のデータを全て削除しますか？\nこの操作は元に戻せません。')) return;
   try {
-    const resp = await fetch(`/api/delete?id=${id}`, { method: 'DELETE' });
-    if (!resp.ok) throw new Error('削除に失敗しました');
-    closeModal();
+    const resp=await fetch(`/api/delete?id=${id}`,{method:'DELETE'});
+    if(!resp.ok) throw new Error('削除に失敗しました');
+    closeDetailModal();
     loadResidents();
-  } catch(e) {
-    alert(e.message);
-  }
+  } catch(e){alert(e.message);}
 }
 </script>
 </body>
