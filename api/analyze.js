@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
  
-  const { image, mediaType, category, prompt, colored } = req.body;
+  const { image, mediaType } = req.body;
  
   if (!image || !mediaType) {
     return res.status(400).json({ error: '画像データが不足しています' });
@@ -19,12 +19,25 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-opus-4-6',
-        max_tokens: 1000,
+        max_tokens: 2000,
         messages: [{
           role: 'user',
           content: [
             { type: 'image', source: { type: 'base64', media_type: mediaType, data: image } },
-            { type: 'text', text: `この画像に写っている${prompt}\n必ずJSON形式のみで返答。他の文字は含めないでください。\n形式: {"items": [{"name": "品目名", "color": "${colored ? '色（具体的に）' : 'なし'}", "colorCode": "${colored ? '#xxxxxx' : '#888888'}", "count": 数量, "note": "特記事項"}]}\n品目が見えない場合はitemsを空配列。` }
+            { type: 'text', text: `この画像に写っている全ての持ち物を詳細に識別してください。
+複数のアイテムが写っている場合は全て列挙してください。
+ 
+各アイテムについて以下を判定してください：
+- カテゴリー：「衣類」「日用品」「貴重品」「電化製品」「趣味・娯楽」「医療用品」のいずれか
+- 品目名：具体的に（例：長袖シャツ、歯ブラシ、財布など）
+- 色：衣類・日用品は具体的に、その他は「なし」
+- カラーコード：色がある場合は16進数、ない場合は#888888
+- 数量：見える個数
+- 備考：ブランド・状態・特徴など
+ 
+必ずJSON形式のみで返答してください。他の文字は一切含めないでください。
+形式: {"items": [{"category": "カテゴリー名", "name": "品目名", "color": "色", "colorCode": "#xxxxxx", "count": 数量, "note": "備考"}]}
+持ち物が見えない場合はitemsを空配列にしてください。` }
           ]
         }]
       })
