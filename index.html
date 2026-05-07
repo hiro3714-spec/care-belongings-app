@@ -156,7 +156,20 @@
           <input type="password" id="login-password" placeholder="パスワード">
         </div>
         <button class="auth-btn" onclick="doLogin()">ログイン</button>
+        <p style="text-align:center;margin-top:12px;"><span style="font-size:13px;color:#007aff;cursor:pointer;" onclick="switchAuthTab('reset')">パスワードを忘れた方はこちら</span></p>
         <div id="login-msg"></div>
+      </div>
+
+      <!-- パスワードリセットフォーム -->
+      <div id="form-reset" class="auth-form">
+        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px;">登録したメールアドレスにリセット用のリンクを送ります。</p>
+        <div class="auth-field">
+          <label>メールアドレス</label>
+          <input type="email" id="reset-email" placeholder="例：info@sakuraen.jp">
+        </div>
+        <button class="auth-btn" onclick="doReset()">リセットメールを送る</button>
+        <p style="text-align:center;margin-top:12px;"><span style="font-size:13px;color:#007aff;cursor:pointer;" onclick="switchAuthTab('login')">← ログインに戻る</span></p>
+        <div id="reset-msg"></div>
       </div>
 
       <!-- 登録フォーム -->
@@ -289,9 +302,21 @@ function initSession() {
 }
 
 function switchAuthTab(tab) {
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(tab==='login'&&i===0)||(tab==='signup'&&i===1)));
-  document.getElementById('form-login').classList.toggle('active',tab==='login');
-  document.getElementById('form-signup').classList.toggle('active',tab==='signup');
+  document.querySelectorAll(".auth-tab").forEach((t,i)=>t.classList.toggle("active",(tab==="login"&&i===0)||(tab==="signup"&&i===1)));
+  document.getElementById("form-login").classList.toggle("active",tab==="login");
+  document.getElementById("form-signup").classList.toggle("active",tab==="signup");
+  document.getElementById("form-reset").classList.toggle("active",tab==="reset");
+}
+
+async function doReset() {
+  const email=document.getElementById("reset-email").value.trim();
+  const msg=document.getElementById("reset-msg");
+  if(!email){msg.innerHTML='<div class="auth-error">メールアドレスを入力してください</div>';return;}
+  msg.innerHTML='<div style="text-align:center;padding:8px;color:#6e6e73;font-size:13px;">送信中...</div>';
+  try {
+    await fetch("/api/auth-reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
+    msg.innerHTML='<div class="auth-success">✅ リセット用メールを送信しました。メールをご確認ください。</div>';
+  } catch(e){msg.innerHTML='<div class="auth-error">エラーが発生しました</div>';}
 }
 
 async function doLogin() {
