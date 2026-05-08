@@ -190,9 +190,17 @@
         <div id="signup-msg"></div>
       </div>
 
-      <!-- パスワード変更フォーム（リセットメールから遷移） -->
+      <!-- パスワード変更フォーム（OTPコード入力） -->
       <div id="form-newpassword" class="auth-form">
-        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px;">新しいパスワードを設定してください。</p>
+        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px;">メールに届いた6桁のコードと新しいパスワードを入力してください。</p>
+        <div class="auth-field">
+          <label>メールアドレス</label>
+          <input type="email" id="newpassword-email" placeholder="登録したメールアドレス">
+        </div>
+        <div class="auth-field">
+          <label>メールに届いたコード（6桁）</label>
+          <input type="text" id="newpassword-otp" placeholder="例：123456" maxlength="6" style="font-size:24px;letter-spacing:6px;text-align:center;">
+        </div>
         <div class="auth-field">
           <label>新しいパスワード（6文字以上）</label>
           <input type="password" id="newpassword-input" placeholder="新しいパスワード">
@@ -202,6 +210,7 @@
           <input type="password" id="newpassword-confirm" placeholder="もう一度入力">
         </div>
         <button class="auth-btn" onclick="doUpdatePassword()">パスワードを変更する</button>
+        <p style="text-align:center;margin-top:12px;"><span style="font-size:13px;color:#007aff;cursor:pointer;" onclick="switchAuthTab('reset')">← コードを再送する</span></p>
         <div id="newpassword-msg"></div>
       </div>
     </div>
@@ -313,45 +322,6 @@ let currentFacility='', currentToken='';
 let resetAccessToken = '';
 
 function initSession() {
-  // URLハッシュとクエリパラメータ両方からトークンを取得
-  const hash = window.location.hash;
-  const search = window.location.search;
-
-  // ハッシュから取得（#access_token=xxx&type=recovery）
-  if (hash.includes('access_token')) {
-    const params = new URLSearchParams(hash.substring(1));
-    const token = params.get('access_token');
-    const type = params.get('type');
-    if (token && type === 'recovery') {
-      resetAccessToken = token;
-      switchAuthTab('newpassword');
-      return;
-    }
-  }
-
-  // クエリパラメータから取得（?access_token=xxx&type=recovery）
-  if (search.includes('access_token')) {
-    const params = new URLSearchParams(search);
-    const token = params.get('access_token');
-    const type = params.get('type');
-    if (token && type === 'recovery') {
-      resetAccessToken = token;
-      switchAuthTab('newpassword');
-      return;
-    }
-  }
-
-  // トークンハッシュから取得（token_hash形式）
-  if (hash.includes('token_hash') || search.includes('token_hash')) {
-    const params = new URLSearchParams(search || hash.substring(1));
-    const tokenHash = params.get('token_hash');
-    if (tokenHash) {
-      resetAccessToken = tokenHash;
-      switchAuthTab('newpassword');
-      return;
-    }
-  }
-
   const token=sessionStorage.getItem('token');
   const facility=sessionStorage.getItem('facility');
   if(token && facility) { currentToken=token; currentFacility=facility; showMain(); }
@@ -366,10 +336,14 @@ function switchAuthTab(tab) {
 }
 
 async function doUpdatePassword() {
+  const email = document.getElementById('newpassword-email').value.trim();
+  const otp = document.getElementById('newpassword-otp').value.trim();
   const password = document.getElementById('newpassword-input').value;
   const confirm = document.getElementById('newpassword-confirm').value;
   const msg = document.getElementById('newpassword-msg');
-  if (!password || !confirm) { msg.innerHTML='<div class="auth-error">両方のパスワードを入力してください</div>'; return; }
+  if (!email) { msg.innerHTML='<div class="auth-error">メールアドレスを入力してください</div>'; return; }
+  if (!otp) { msg.innerHTML='<div class="auth-error">コードを入力してください</div>'; return; }
+  if (!password || !confirm) { msg.innerHTML='<div class="auth-error">パスワードを入力してください</div>'; return; }
   if (password.length < 6) { msg.innerHTML='<div class="auth-error">パスワードは6文字以上にしてください</div>'; return; }
   if (password !== confirm) { msg.innerHTML='<div class="auth-error">パスワードが一致しません</div>'; return; }
   msg.innerHTML='<div style="text-align:center;padding:8px;color:#6e6e73;font-size:13px;">変更中...</div>';
@@ -377,13 +351,11 @@ async function doUpdatePassword() {
     const resp = await fetch('/api/auth-update-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ access_token: resetAccessToken, password })
+      body: JSON.stringify({ email, otp, password })
     });
     const data = await resp.json();
     if (!resp.ok) { msg.innerHTML=`<div class="auth-error">${data.error}</div>`; return; }
     msg.innerHTML='<div class="auth-success">✅ パスワードを変更しました！ログインしてください。</div>';
-    resetAccessToken = '';
-    window.location.hash = '';
     setTimeout(() => switchAuthTab('login'), 2000);
   } catch(e) { msg.innerHTML='<div class="auth-error">エラーが発生しました</div>'; }
 }
