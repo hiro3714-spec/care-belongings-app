@@ -313,16 +313,45 @@ let currentFacility='', currentToken='';
 let resetAccessToken = '';
 
 function initSession() {
-  // URLハッシュにリセットトークンがあるか確認
+  // URLハッシュとクエリパラメータ両方からトークンを取得
   const hash = window.location.hash;
-  if (hash.includes('access_token') && hash.includes('type=recovery')) {
+  const search = window.location.search;
+
+  // ハッシュから取得（#access_token=xxx&type=recovery）
+  if (hash.includes('access_token')) {
     const params = new URLSearchParams(hash.substring(1));
-    resetAccessToken = params.get('access_token') || '';
-    if (resetAccessToken) {
+    const token = params.get('access_token');
+    const type = params.get('type');
+    if (token && type === 'recovery') {
+      resetAccessToken = token;
       switchAuthTab('newpassword');
       return;
     }
   }
+
+  // クエリパラメータから取得（?access_token=xxx&type=recovery）
+  if (search.includes('access_token')) {
+    const params = new URLSearchParams(search);
+    const token = params.get('access_token');
+    const type = params.get('type');
+    if (token && type === 'recovery') {
+      resetAccessToken = token;
+      switchAuthTab('newpassword');
+      return;
+    }
+  }
+
+  // トークンハッシュから取得（token_hash形式）
+  if (hash.includes('token_hash') || search.includes('token_hash')) {
+    const params = new URLSearchParams(search || hash.substring(1));
+    const tokenHash = params.get('token_hash');
+    if (tokenHash) {
+      resetAccessToken = tokenHash;
+      switchAuthTab('newpassword');
+      return;
+    }
+  }
+
   const token=sessionStorage.getItem('token');
   const facility=sessionStorage.getItem('facility');
   if(token && facility) { currentToken=token; currentFacility=facility; showMain(); }
