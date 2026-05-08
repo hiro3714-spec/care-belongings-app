@@ -189,6 +189,21 @@
         <button class="auth-btn" onclick="doSignup()">登録する</button>
         <div id="signup-msg"></div>
       </div>
+
+      <!-- パスワード変更フォーム（リセットメールから遷移） -->
+      <div id="form-newpassword" class="auth-form">
+        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px;">新しいパスワードを設定してください。</p>
+        <div class="auth-field">
+          <label>新しいパスワード（6文字以上）</label>
+          <input type="password" id="newpassword-input" placeholder="新しいパスワード">
+        </div>
+        <div class="auth-field">
+          <label>新しいパスワード（確認）</label>
+          <input type="password" id="newpassword-confirm" placeholder="もう一度入力">
+        </div>
+        <button class="auth-btn" onclick="doUpdatePassword()">パスワードを変更する</button>
+        <div id="newpassword-msg"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -294,8 +309,20 @@ let currentImage=null, currentItems=[], currentMode='new', selectedResident=null
 let detailResident=null, detailItems=[], editMode=false;
 let currentFacility='', currentToken='';
 
-// セッション復元
+// セッション復元・リセットトークン検出
+let resetAccessToken = '';
+
 function initSession() {
+  // URLハッシュにリセットトークンがあるか確認
+  const hash = window.location.hash;
+  if (hash.includes('access_token') && hash.includes('type=recovery')) {
+    const params = new URLSearchParams(hash.substring(1));
+    resetAccessToken = params.get('access_token') || '';
+    if (resetAccessToken) {
+      switchAuthTab('newpassword');
+      return;
+    }
+  }
   const token=sessionStorage.getItem('token');
   const facility=sessionStorage.getItem('facility');
   if(token && facility) { currentToken=token; currentFacility=facility; showMain(); }
@@ -306,6 +333,30 @@ function switchAuthTab(tab) {
   document.getElementById("form-login").classList.toggle("active",tab==="login");
   document.getElementById("form-signup").classList.toggle("active",tab==="signup");
   document.getElementById("form-reset").classList.toggle("active",tab==="reset");
+  document.getElementById("form-newpassword").classList.toggle("active",tab==="newpassword");
+}
+
+async function doUpdatePassword() {
+  const password = document.getElementById('newpassword-input').value;
+  const confirm = document.getElementById('newpassword-confirm').value;
+  const msg = document.getElementById('newpassword-msg');
+  if (!password || !confirm) { msg.innerHTML='<div class="auth-error">両方のパスワードを入力してください</div>'; return; }
+  if (password.length < 6) { msg.innerHTML='<div class="auth-error">パスワードは6文字以上にしてください</div>'; return; }
+  if (password !== confirm) { msg.innerHTML='<div class="auth-error">パスワードが一致しません</div>'; return; }
+  msg.innerHTML='<div style="text-align:center;padding:8px;color:#6e6e73;font-size:13px;">変更中...</div>';
+  try {
+    const resp = await fetch('/api/auth-update-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: resetAccessToken, password })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { msg.innerHTML=`<div class="auth-error">${data.error}</div>`; return; }
+    msg.innerHTML='<div class="auth-success">✅ パスワードを変更しました！ログインしてください。</div>';
+    resetAccessToken = '';
+    window.location.hash = '';
+    setTimeout(() => switchAuthTab('login'), 2000);
+  } catch(e) { msg.innerHTML='<div class="auth-error">エラーが発生しました</div>'; }
 }
 
 async function doReset() {
