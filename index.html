@@ -353,8 +353,8 @@ function toggleVisibility(id, btn) {
 }
 
 function initSession() {
-  const token=sessionStorage.getItem('token');
-  const facility=sessionStorage.getItem('facility');
+  const token=localStorage.getItem('token');
+  const facility=localStorage.getItem('facility');
   if(token && facility) { currentToken=token; currentFacility=facility; showMain(); }
 }
 
@@ -416,8 +416,8 @@ async function doLogin() {
     if(!resp.ok){msg.innerHTML=`<div class="auth-error">${data.error}</div>`;return;}
     currentToken=data.access_token;
     currentFacility=data.facility_name;
-    sessionStorage.setItem('token',currentToken);
-    sessionStorage.setItem('facility',currentFacility);
+    localStorage.setItem('token',currentToken);
+    localStorage.setItem('facility',currentFacility);
     showMain();
   } catch(e){msg.innerHTML=`<div class="auth-error">エラーが発生しました</div>`;}
 }
@@ -447,7 +447,7 @@ function showMain() {
 }
 
 function doLogout() {
-  sessionStorage.clear();
+  localStorage.removeItem('token'); localStorage.removeItem('facility');
   currentToken=''; currentFacility='';
   document.getElementById('page-main').classList.remove('active');
   document.getElementById('page-auth').classList.add('active');
