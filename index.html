@@ -168,8 +168,9 @@
           <input type="email" id="reset-email" placeholder="例：info@sakuraen.jp">
         </div>
         <button class="auth-btn" onclick="doReset()">リセットメールを送る</button>
-        <p style="text-align:center;margin-top:12px;"><span style="font-size:13px;color:#007aff;cursor:pointer;" onclick="switchAuthTab('login')">← ログインに戻る</span></p>
         <div id="reset-msg"></div>
+        <button class="auth-btn" id="goto-newpassword-btn" onclick="switchAuthTab('newpassword')" style="display:none;margin-top:8px;background:#34c759;">コード入力画面へ進む →</button>
+        <p style="text-align:center;margin-top:12px;"><span style="font-size:13px;color:#007aff;cursor:pointer;" onclick="switchAuthTab('login')">← ログインに戻る</span></p>
       </div>
 
       <!-- 登録フォーム -->
