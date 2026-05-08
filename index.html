@@ -368,7 +368,9 @@ async function doReset() {
   msg.innerHTML='<div style="text-align:center;padding:8px;color:#6e6e73;font-size:13px;">送信中...</div>';
   try {
     await fetch("/api/auth-reset",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email})});
-    msg.innerHTML='<div class="auth-success">✅ リセット用メールを送信しました。メールをご確認ください。</div>';
+    msg.innerHTML='<div class="auth-success">✅ 数字のコードをメールに送りました！</div>';
+    document.getElementById('goto-newpassword-btn').style.display='block';
+    document.getElementById('newpassword-email').value = email;
   } catch(e){msg.innerHTML='<div class="auth-error">エラーが発生しました</div>';}
 }
 
