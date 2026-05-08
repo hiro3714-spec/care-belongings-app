@@ -1,13 +1,13 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  const { access_token, password } = req.body;
-  if (!access_token || !password) return res.status(400).json({ error: 'データが不足しています' });
+  const { email, otp, password } = req.body;
+  if (!email || !otp || !password) return res.status(400).json({ error: 'データが不足しています' });
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
   try {
-    // OTPとしてトークンを検証してセッションを取得
+    // OTPコードでセッションを取得
     const verifyResp = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
       method: 'POST',
       headers: {
@@ -15,21 +15,18 @@ export default async function handler(req, res) {
         'apikey': SUPABASE_ANON_KEY
       },
       body: JSON.stringify({
-        token: access_token,
+        email,
+        token: otp,
         type: 'recovery'
       })
     });
 
     const verifyData = await verifyResp.json();
-
     if (!verifyResp.ok || !verifyData.access_token) {
-      return res.status(400).json({ 
-        error: 'トークンが無効か期限切れです。もう一度リセットメールを送ってください。',
-        detail: JSON.stringify(verifyData)
-      });
+      return res.status(400).json({ error: 'コードが無効か期限切れです。もう一度お試しください。' });
     }
 
-    // 取得したセッショントークンでパスワード更新
+    // パスワード更新
     const updateResp = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       method: 'PUT',
       headers: {
