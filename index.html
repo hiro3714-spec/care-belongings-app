@@ -552,21 +552,41 @@ function renderDetailModal() {
       <p style="font-size:13px;color:#6e6e73;">${detailResident.room_number?detailResident.room_number+'　':''}更新日：${detailResident.registered_date}　合計 ${total} 点</p>
     </div>
     <div class="edit-mode-bar no-print">
-      <span>${editMode?'🗑️ ×ボタンで荷物を削除できます':''}</span>
+      <span style="font-size:12px;color:#6e6e73;">${editMode?'✏️ タップして編集、×で削除':''}</span>
       <button class="edit-toggle" onclick="toggleEditMode()">${editMode?'編集終了':'✏️ 荷物を編集・削除'}</button>
     </div>`;
   html+=Object.entries(grouped).map(([cat,items])=>`
     <div class="cat-section">
       <div class="cat-header">${CATS[cat]?.icon||'📦'} ${cat}（${items.length}点）</div>
-      <div class="items-card">${items.map(item=>`
+      <div class="items-card">${items.map(item=>editMode ? `
+        <div class="detail-item-row" style="flex-wrap:wrap;gap:6px;padding:10px 0;">
+          <div style="display:flex;align-items:center;gap:8px;width:100%;">
+            <div class="item-dot" style="background:${item.colorCode||'#ccc'};flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <select onchange="updateDetailItem(${item._didx},'category',this.value)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;margin-bottom:4px;">
+                ${Object.keys(CATS).map(c=>`<option value="${c}" ${item.category===c?'selected':''}>${CATS[c].icon} ${c}</option>`).join('')}
+              </select>
+              <input type="text" value="${item.name}" onchange="updateDetailItem(${item._didx},'name',this.value)" style="width:100%;font-size:13px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;margin-bottom:4px;" placeholder="品目名">
+              <div style="display:flex;gap:4px;">
+                <input type="text" value="${item.color&&item.color!=='なし'?item.color:''}" onchange="updateDetailItem(${item._didx},'color',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="色">
+                <input type="number" value="${item.count}" min="1" onchange="updateDetailItem(${item._didx},'count',parseInt(this.value)||1)" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="数">
+              </div>
+            </div>
+            <div class="detail-item-del" onclick="removeDetailItem(${item._didx})" style="align-self:flex-start;">×</div>
+          </div>
+        </div>` : `
         <div class="detail-item-row">
           <div class="item-dot" style="background:${item.colorCode||'#ccc'}"></div>
           <div class="item-info"><div class="item-name">${item.name}</div><div class="item-detail">${[item.color&&item.color!=='なし'?item.color:'',item.note||''].filter(Boolean).join('　')}</div></div>
           <div class="item-count">${item.count}点</div>
-          ${editMode?`<div class="detail-item-del" onclick="removeDetailItem(${item._didx})">×</div>`:''}
         </div>`).join('')}
       </div>
     </div>`).join('');
+  if(editMode) {
+    html+=`<div style="margin-top:12px;" class="no-print">
+      <button class="btn-primary" onclick="saveDetailEdits()" style="font-size:14px;padding:12px;">変更を保存する</button>
+    </div>`;
+  }
   html+=`<div class="divider no-print"></div>
     <div style="display:flex;gap:8px;" class="no-print">
       <button class="btn-primary" onclick="printFromDetail()" style="font-size:14px;padding:12px;">印刷する</button>
@@ -578,6 +598,21 @@ function renderDetailModal() {
 }
 
 function toggleEditMode(){editMode=!editMode;renderDetailModal();}
+
+function updateDetailItem(idx, field, value) {
+  detailItems[idx][field]=value;
+}
+
+async function saveDetailEdits() {
+  try {
+    await fetch('/api/update-items',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:detailResident.id,items:detailItems})});
+    detailResident.items=JSON.stringify(detailItems);
+    editMode=false;
+    renderDetailModal();
+    loadResidents();
+    alert('保存しました！');
+  } catch(e){alert('保存に失敗しました');}
+}
 
 async function removeDetailItem(idx) {
   if(!confirm('この荷物を削除しますか？')) return;
