@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
   try {
-    // OTPコードでセッションを取得
+    // まずOTPでセッションを取得
     const verifyResp = await fetch(`${SUPABASE_URL}/auth/v1/verify`, {
       method: 'POST',
       headers: {
@@ -22,8 +22,13 @@ export default async function handler(req, res) {
     });
 
     const verifyData = await verifyResp.json();
+
     if (!verifyResp.ok || !verifyData.access_token) {
-      return res.status(400).json({ error: 'コードが無効か期限切れです。もう一度お試しください。' });
+      // verifyが失敗した場合、エラー詳細をログ
+      console.error('Verify failed:', JSON.stringify(verifyData));
+      return res.status(400).json({ 
+        error: 'コードが無効か期限切れです。もう一度リセットメールを送ってください。'
+      });
     }
 
     // パスワード更新
