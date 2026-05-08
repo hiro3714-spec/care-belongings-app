@@ -275,6 +275,7 @@
             <option value="電化製品">📺 電化製品</option>
             <option value="趣味・娯楽">📚 趣味・娯楽</option>
             <option value="医療用品">👓 医療用品</option>
+            <option value="その他">📦 その他</option>
           </select>
           <input type="text" id="new-item" placeholder="手動で追加">
           <button onclick="addManualItem()">追加</button>
@@ -315,7 +316,7 @@
 </div>
 
 <script>
-const CATS = { '衣類':{icon:'👕'}, '日用品':{icon:'🪥'}, '貴重品':{icon:'💼'}, '電化製品':{icon:'📺'}, '趣味・娯楽':{icon:'📚'}, '医療用品':{icon:'👓'} };
+const CATS = { '衣類':{icon:'👕'}, '日用品':{icon:'🪥'}, '貴重品':{icon:'💼'}, '電化製品':{icon:'📺'}, '趣味・娯楽':{icon:'📚'}, '医療用品':{icon:'👓'}, 'その他':{icon:'📦'} };
 let currentImage=null, currentItems=[], currentMode='new', selectedResident=null, residentsList=[];
 let detailResident=null, detailItems=[], editMode=false;
 let currentFacility='', currentToken='';
@@ -624,8 +625,14 @@ function renderDetailModal() {
               </select>
               <input type="text" value="${item.name}" onchange="updateDetailItem(${item._didx},'name',this.value)" style="width:100%;font-size:13px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;margin-bottom:4px;" placeholder="品目名">
               <div style="display:flex;gap:4px;">
-                <input type="text" value="${item.color&&item.color!=='なし'?item.color:''}" onchange="updateDetailItem(${item._didx},'color',this.value)" style="flex:1;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="色">
-                <input type="number" value="${item.count}" min="1" onchange="updateDetailItem(${item._didx},'count',parseInt(this.value)||1)" style="width:60px;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="数">
+                <div style="flex:1;">
+                  <div style="font-size:10px;color:#6e6e73;margin-bottom:2px;">🎨 色</div>
+                  <input type="text" value="${item.color&&item.color!=='なし'?item.color:''}" onchange="updateDetailItem(${item._didx},'color',this.value)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="例：ベージュ">
+                </div>
+                <div style="width:70px;">
+                  <div style="font-size:10px;color:#6e6e73;margin-bottom:2px;">🔢 数量</div>
+                  <input type="number" value="${item.count}" min="1" onchange="updateDetailItem(${item._didx},'count',parseInt(this.value)||1)" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;" placeholder="数">
+                </div>
               </div>
             </div>
             <div class="detail-item-del" onclick="removeDetailItem(${item._didx})" style="align-self:flex-start;">×</div>
