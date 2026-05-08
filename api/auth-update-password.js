@@ -43,7 +43,13 @@ export default async function handler(req, res) {
     });
 
     const updateData = await updateResp.json();
-    if (!updateResp.ok) return res.status(400).json({ error: updateData.message || 'パスワード変更に失敗しました' });
+    if (!updateResp.ok) {
+      const msg = updateData.message || '';
+      if (msg.includes('same password') || msg.includes('different password')) {
+        return res.status(400).json({ error: '以前と同じパスワードは使用できません。新しいパスワードを設定してください。' });
+      }
+      return res.status(400).json({ error: 'パスワード変更に失敗しました。もう一度お試しください。' });
+    }
     return res.status(200).json({ success: true });
   } catch(e) {
     return res.status(500).json({ error: e.message });
