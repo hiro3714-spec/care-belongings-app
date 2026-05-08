@@ -2,13 +2,13 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
- 
+
   const { image, mediaType } = req.body;
- 
+
   if (!image || !mediaType) {
     return res.status(400).json({ error: '画像データが不足しています' });
   }
- 
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -26,7 +26,7 @@ export default async function handler(req, res) {
             { type: 'image', source: { type: 'base64', media_type: mediaType, data: image } },
             { type: 'text', text: `この画像に写っている全ての持ち物を詳細に識別してください。複数のアイテムが写っている場合は全て列挙してください。
 各アイテムについて以下を判定してください：
-- カテゴリー：「衣類」「日用品」「貴重品」「電化製品」「趣味・娯楽」「医療用品」のいずれか
+- カテゴリー：「衣類」「日用品」「貴重品」「電化製品」「趣味・娯楽」「医療用品」「その他」のいずれか
 - 品目名：具体的に（例：長袖シャツ、歯ブラシ、財布など）
 - 色：衣類・日用品は具体的に、その他は「なし」
 - カラーコード：色がある場合は16進数、ない場合は#888888
@@ -39,12 +39,12 @@ export default async function handler(req, res) {
         }]
       })
     });
- 
+
     if (!response.ok) {
       const errData = await response.json();
       return res.status(500).json({ error: errData.error?.message || 'API呼び出しに失敗しました' });
     }
- 
+
     const data = await response.json();
     const text = data.content[0].text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(text);
