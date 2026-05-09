@@ -135,6 +135,15 @@
     }
     .print-header-block { padding-bottom: 14px; border-bottom: 2px solid #1d1d1f; margin-bottom: 16px; }
     .print-page-header { display: none; border-bottom: 1px solid #ccc; margin-bottom: 8px; padding-bottom: 6px; justify-content: space-between; align-items: center; }
+    .checkout-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f2f2f7; }
+    .checkout-item:last-child { border-bottom: none; }
+    .checkout-item.checked { opacity: 0.5; }
+    .checkout-check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #e5e5ea; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; background: #fff; }
+    .checkout-check.checked { background: #34c759; border-color: #34c759; color: #fff; }
+    .checkout-progress { background: #e5e5ea; border-radius: 10px; height: 8px; margin: 12px 0; overflow: hidden; }
+    .checkout-progress-bar { background: #34c759; height: 100%; border-radius: 10px; transition: width 0.3s; }
+    .checkout-summary { text-align: center; padding: 12px; font-size: 14px; color: #6e6e73; }
+    .checkout-complete { background: #f0fff4; border: 1px solid #b7f5d0; border-radius: 10px; padding: 12px; text-align: center; font-size: 14px; color: #007a3d; margin-top: 12px; }
     .print-facility { font-size: 13px; color: #007aff; margin-bottom: 6px; font-weight: 500; }
     .print-name { font-size: 24px; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; }
     .print-meta { font-size: 13px; color: #6e6e73; }
@@ -323,6 +332,20 @@
       <span class="modal-close" onclick="closeDetailModal()">閉じる</span>
     </div>
     <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- 退所チェックモーダル -->
+<div class="modal" id="checkout-modal">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2>🚪 退所チェック</h2>
+      <span class="modal-close" onclick="document.getElementById('checkout-modal').style.display='none'">閉じる</span>
+    </div>
+    <div id="checkout-content"></div>
+    <div style="margin-top:14px;display:flex;gap:8px;">
+      <button class="btn-primary" onclick="saveCheckout()" style="font-size:14px;padding:12px;">チェック結果を保存する</button>
+    </div>
   </div>
 </div>
 
@@ -845,10 +868,24 @@ function renderDetailModal() {
   if (editMode) {
     html += '<div style="margin-top:12px;" class="no-print"><button class="btn-primary" onclick="saveDetailEdits()" style="font-size:14px;padding:12px;">変更を保存する</button></div>';
   }
+  var checkoutData = detailResident.checkout_data ? JSON.parse(detailResident.checkout_data) : null;
+  var checkoutStatus = '';
+  if (checkoutData) {
+    var checkedCount = checkoutData.filter(function(c) { return c.checked; }).length;
+    checkoutStatus = '<div style="margin-top:8px;padding:8px 12px;background:#f0fff4;border-radius:8px;font-size:12px;color:#007a3d;">'
+      + '✅ 退所チェック済み（' + checkedCount + '/' + checkoutData.length + '点確認）'
+      + '<span style="margin-left:8px;color:#007aff;cursor:pointer;" onclick="startCheckout()">再チェック</span>'
+      + '</div>';
+  }
   html += '<div class="divider no-print"></div>'
-    + '<div style="display:flex;gap:8px;" class="no-print">'
+    + checkoutStatus
+    + '<div style="display:flex;gap:8px;margin-top:8px;" class="no-print">'
     + '<button class="btn-primary" onclick="printFromDetail()" style="font-size:14px;padding:12px;">印刷する</button>'
     + '<button class="btn-secondary" onclick="exportCSV()" style="font-size:14px;padding:12px;">CSVで保存</button>'
+    + '</div>'
+    + '<div style="margin-top:8px;" class="no-print">'
+    + '<button class="btn-secondary" onclick="startCheckout()" style="background:#fff3cd;color:#856404;border:1px solid #ffc107;">'
+    + '🚪 退所チェックを開始する</button>'
     + '</div>'
     + '<div style="margin-top:8px;" class="no-print">'
     + '<button class="btn-danger" onclick="deleteResident(' + detailResident.id + ')">⚠️ この入居者を削除する</button>'
@@ -961,6 +998,97 @@ async function deleteResident(id) {
     closeDetailModal();
     loadResidents();
   } catch(e) { alert('削除に失敗しました'); }
+}
+
+var checkoutItems = [];
+
+function startCheckout() {
+  if (!detailResident || !detailItems.length) return;
+  // 既存のチェックデータがあれば引き継ぐ
+  var existingCheckout = detailResident.checkout_data ? JSON.parse(detailResident.checkout_data) : null;
+  checkoutItems = detailItems.map(function(item, i) {
+    var existing = existingCheckout ? existingCheckout.find(function(c) { return c.name === item.name && c.category === item.category; }) : null;
+    return {
+      category: item.category || 'その他',
+      name: item.name,
+      color: item.color || '',
+      colorCode: item.colorCode || '#888',
+      count: item.count || 1,
+      checked: existing ? existing.checked : false
+    };
+  });
+  renderCheckoutModal();
+  document.getElementById('checkout-modal').style.display = 'block';
+}
+
+function renderCheckoutModal() {
+  var total = checkoutItems.length;
+  var checked = checkoutItems.filter(function(i) { return i.checked; }).length;
+  var pct = total > 0 ? Math.round(checked / total * 100) : 0;
+
+  var grouped = {};
+  checkoutItems.forEach(function(item, i) {
+    var cat = item.category || 'その他';
+    if (!grouped[cat]) grouped[cat] = [];
+    grouped[cat].push(Object.assign({}, item, {_cidx: i}));
+  });
+
+  var progress = '<div class="checkout-summary">' + checked + ' / ' + total + ' 点確認済み</div>'
+    + '<div class="checkout-progress"><div class="checkout-progress-bar" style="width:' + pct + '%"></div></div>';
+
+  var complete = checked === total && total > 0
+    ? '<div class="checkout-complete">🎉 全ての持ち物を確認しました！</div>' : '';
+
+  var rows = Object.keys(grouped).map(function(cat) {
+    var items = grouped[cat];
+    var icon = CATS[cat] ? CATS[cat].icon : '📦';
+    return '<div style="margin-bottom:12px;">'
+      + '<div style="font-size:12px;font-weight:600;color:#6e6e73;padding:6px 0;">' + icon + ' ' + cat + '</div>'
+      + '<div style="background:#fff;border-radius:10px;padding:0 14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+      + items.map(function(item) {
+          var detail = item.color && item.color !== 'なし' ? item.color : '';
+          return '<div class="checkout-item' + (item.checked ? ' checked' : '') + '">'
+            + '<div class="checkout-check' + (item.checked ? ' checked' : '') + '" onclick="toggleCheck(' + item._cidx + ')">'
+            + (item.checked ? '✓' : '') + '</div>'
+            + '<div class="item-dot" style="background:' + (item.colorCode || '#ccc') + ';width:18px;height:18px;border-radius:4px;border:1px solid #e5e5ea;flex-shrink:0;"></div>'
+            + '<div style="flex:1;">'
+            + '<div style="font-size:14px;font-weight:500;' + (item.checked ? 'text-decoration:line-through;' : '') + '">' + item.name + '</div>'
+            + (detail ? '<div style="font-size:12px;color:#6e6e73;">' + detail + '</div>' : '')
+            + '</div>'
+            + '<div style="font-size:13px;color:#6e6e73;">' + item.count + '点</div>'
+            + '</div>';
+        }).join('')
+      + '</div></div>';
+  }).join('');
+
+  document.getElementById('checkout-content').innerHTML = progress + complete + rows;
+}
+
+function toggleCheck(idx) {
+  checkoutItems[idx].checked = !checkoutItems[idx].checked;
+  renderCheckoutModal();
+}
+
+async function saveCheckout() {
+  try {
+    await fetch('/api/update-items', {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        id: detailResident.id,
+        items: detailItems,
+        checkout_data: checkoutItems
+      })
+    });
+    detailResident.checkout_data = JSON.stringify(checkoutItems);
+    var checked = checkoutItems.filter(function(i) { return i.checked; }).length;
+    alert('退所チェックを保存しました（' + checked + '/' + checkoutItems.length + '点確認済み）');
+    document.getElementById('checkout-modal').style.display = 'none';
+    renderDetailModal();
+    loadResidents();
+  } catch(e) {
+    alert('保存に失敗しました');
+  }
 }
 
 function exportCSV() {
