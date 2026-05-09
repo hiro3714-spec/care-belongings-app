@@ -474,7 +474,8 @@ async function showMain() {
   document.getElementById('page-main').classList.add('active');
   document.getElementById('header-facility').textContent = '🏥 ' + currentFacility;
   loadResidents();
-  checkSubscription();
+  // Stripe処理完了を待つため3秒後にチェック
+  setTimeout(checkSubscription, 3000);
 }
 
 async function checkSubscription() {
