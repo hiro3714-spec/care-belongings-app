@@ -345,6 +345,7 @@
     <div id="checkout-content"></div>
     <div style="margin-top:14px;display:flex;gap:8px;">
       <button class="btn-primary" onclick="saveCheckout()" style="font-size:14px;padding:12px;">チェック結果を保存する</button>
+      <button class="btn-secondary" onclick="resetCheckout()" style="font-size:13px;padding:12px;color:#ff3b30;">全てリセット</button>
     </div>
   </div>
 </div>
@@ -868,9 +869,18 @@ function renderDetailModal() {
   if (editMode) {
     html += '<div style="margin-top:12px;" class="no-print"><button class="btn-primary" onclick="saveDetailEdits()" style="font-size:14px;padding:12px;">変更を保存する</button></div>';
   }
-  var checkoutData = detailResident.checkout_data ? JSON.parse(detailResident.checkout_data) : null;
+  var checkoutData = null;
+  try {
+    if (detailResident.checkout_data) {
+      checkoutData = JSON.parse(detailResident.checkout_data);
+      // 全未チェックの場合はnull扱い
+      if (checkoutData && checkoutData.filter(function(c) { return c.checked; }).length === 0) {
+        checkoutData = null;
+      }
+    }
+  } catch(e) { checkoutData = null; }
   var checkoutStatus = '';
-  if (checkoutData) {
+  if (checkoutData && checkoutData.length > 0) {
     var checkedCount = checkoutData.filter(function(c) { return c.checked; }).length;
     checkoutStatus = '<div style="margin-top:8px;padding:8px 12px;background:#f0fff4;border-radius:8px;font-size:12px;color:#007a3d;">'
       + '✅ 退所チェック済み（' + checkedCount + '/' + checkoutData.length + '点確認）'
@@ -1069,20 +1079,33 @@ function toggleCheck(idx) {
   renderCheckoutModal();
 }
 
+function resetCheckout() {
+  if (!confirm('全てのチェックをリセットしますか？')) return;
+  checkoutItems = checkoutItems.map(function(item) {
+    return Object.assign({}, item, {checked: false});
+  });
+  renderCheckoutModal();
+}
+
 async function saveCheckout() {
   try {
+    var checked = checkoutItems.filter(function(i) { return i.checked; }).length;
+    // 全てチェックなしの場合はリセット扱い
+    var saveData = checked === 0 ? null : checkoutItems;
     await fetch('/api/update-items', {
       method: 'PATCH',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         id: detailResident.id,
         items: detailItems,
-        checkout_data: checkoutItems
+        checkout_data: saveData
       })
     });
-    detailResident.checkout_data = JSON.stringify(checkoutItems);
-    var checked = checkoutItems.filter(function(i) { return i.checked; }).length;
-    alert('退所チェックを保存しました（' + checked + '/' + checkoutItems.length + '点確認済み）');
+    detailResident.checkout_data = saveData ? JSON.stringify(saveData) : null;
+    var msg = checked === 0
+      ? '退所チェックをリセットしました'
+      : '退所チェックを保存しました（' + checked + '/' + checkoutItems.length + '点確認済み）';
+    alert(msg);
     document.getElementById('checkout-modal').style.display = 'none';
     renderDetailModal();
     loadResidents();
