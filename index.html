@@ -116,19 +116,25 @@
     .edit-toggle { font-size: 13px; color: #007aff; cursor: pointer; padding: 4px 10px; border: 1px solid #007aff; border-radius: 8px; background: #fff; }
     .divider { height: 1px; background: #e5e5ea; margin: 14px 0; }
     @media print {
-      @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
-      body { background: #fff; font-size: 12pt; }
+      @page {
+        size: A4;
+        margin: 15mm 15mm 20mm 15mm;
+      }
+      body { background: #fff; font-size: 11pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .page { display: none !important; }
       #print-modal { display: block !important; position: static; background: none; }
       .modal-inner { margin: 0; padding: 0; box-shadow: none; }
       .no-print { display: none !important; }
-      table { width: 100%; border-collapse: collapse; font-size: 10pt; page-break-inside: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 10pt; }
       tr { page-break-inside: avoid; }
       th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .print-cat-title { page-break-after: avoid; margin-top: 12pt; }
-      .print-header-block { margin-bottom: 16pt; }
+      .print-cat-title { page-break-after: avoid; }
+      .print-cat-block { page-break-inside: avoid; }
+      .print-header-block { page-break-after: avoid; margin-bottom: 12pt; }
+      .print-page-header { display: flex !important; }
     }
     .print-header-block { padding-bottom: 14px; border-bottom: 2px solid #1d1d1f; margin-bottom: 16px; }
+    .print-page-header { display: none; border-bottom: 1px solid #ccc; margin-bottom: 8px; padding-bottom: 6px; justify-content: space-between; align-items: center; }
     .print-facility { font-size: 13px; color: #007aff; margin-bottom: 6px; font-weight: 500; }
     .print-name { font-size: 24px; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; }
     .print-meta { font-size: 13px; color: #6e6e73; }
@@ -670,7 +676,7 @@ function openDetailModal(id, encoded) {
 
 function renderDetailModal() {
   var total = detailItems.reduce(function(s, i) { return s + i.count; }, 0);
-  document.getElementById('detail-title').textContent = detailResident.resident_name + 'さんの持ち物';
+  document.getElementById('detail-title').textContent = detailResident.resident_name + ' 様';
   var grouped = {};
   detailItems.forEach(function(item, i) {
     var cat = item.category || 'その他';
@@ -759,15 +765,22 @@ async function removeDetailItem(idx) {
   } catch(e) { alert('削除に失敗しました'); }
 }
 
-function buildTable(items) {
+function buildTable(items, residentName, facilityName) {
   var cats = [];
   items.forEach(function(i) { if (cats.indexOf(i.category) === -1) cats.push(i.category); });
+  var rName = residentName || '';
+  var fName = facilityName || '';
+  // 2ページ目以降に表示するヘッダー
+  var pageHeader = '<div class="print-page-header" style="border-bottom:1px solid #ccc;margin-bottom:8px;padding-bottom:6px;display:flex;justify-content:space-between;align-items:center;">'
+    + '<span style="font-size:10pt;font-weight:600;">' + fName + '　' + rName + ' 様</span>'
+    + '<span style="font-size:9pt;color:#666;">持ち物リスト（続き）</span>'
+    + '</div>';
   return cats.map(function(cat) {
     var catItems = items.filter(function(i) { return i.category === cat; });
     var icon = CATS[cat] ? CATS[cat].icon : '📦';
     var rows = catItems.map(function(item) {
       var colorCell = (item.color && item.color !== 'なし')
-        ? '<span class="color-dot" style="background:' + (item.colorCode || '#888') + ';display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #ccc;vertical-align:middle;margin-right:4px;"></span>' + item.color
+        ? '<span style="background:' + (item.colorCode || '#888') + ';display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #ccc;vertical-align:middle;margin-right:4px;"></span>' + item.color
         : '—';
       return '<tr>'
         + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;">' + item.name + '</td>'
@@ -776,29 +789,31 @@ function buildTable(items) {
         + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;color:#6e6e73;">' + (item.note || '') + '</td>'
         + '</tr>';
     }).join('');
-    return '<div class="print-cat-title" style="font-size:13px;font-weight:700;color:#1d1d1f;margin:14px 0 4px;padding:4px 8px;background:#f0f0f0;border-left:3px solid #007aff;">' + icon + ' ' + cat + '</div>'
-      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+    return '<div class="print-cat-block">'
+      + '<div class="print-cat-title" style="font-size:12px;font-weight:700;color:#1d1d1f;margin:12px 0 4px;padding:4px 8px;background:#f0f0f0;border-left:3px solid #007aff;">' + icon + ' ' + cat + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:10px;">'
       + '<thead><tr style="background:#f8f8f8;">'
-      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:35%;">品目</th>'
-      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:25%;">色・詳細</th>'
-      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:center;font-size:11px;width:10%;">数</th>'
-      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:30%;">備考</th>'
-      + '</tr></thead><tbody>' + rows + '</tbody></table>';
-  }).join('');
+      + '<th style="padding:6px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:10px;width:35%;">品目</th>'
+      + '<th style="padding:6px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:10px;width:25%;">色・詳細</th>'
+      + '<th style="padding:6px 8px;border-bottom:2px solid #1d1d1f;text-align:center;font-size:10px;width:10%;">数</th>'
+      + '<th style="padding:6px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:10px;width:30%;">備考</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table>'
+      + '</div>';
+  }).join('') + pageHeader;
 }
 
 function printFromDetail() {
   var total = detailItems.reduce(function(s, i) { return s + i.count; }, 0);
-  document.getElementById('modal-title').textContent = detailResident.resident_name + 'さんの持ち物';
+  document.getElementById('modal-title').textContent = '印刷プレビュー';
   document.getElementById('print-content').innerHTML =
     '<div class="print-header-block">'
     + '<div class="print-facility">🏥 ' + currentFacility + '</div>'
     + '<div class="print-name">' + detailResident.resident_name + ' 様</div>'
     + '<div class="print-meta">' + (detailResident.room_number ? detailResident.room_number + '　' : '') + '登録日：' + detailResident.registered_date + '　合計 ' + total + ' 点</div>'
     + '</div>'
-    + buildTable(detailItems)
+    + buildTable(detailItems, detailResident.resident_name, currentFacility)
     + '<div class="print-total">合計 ' + total + ' 点</div>'
-    + '<button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>';
+    + '<div class="no-print" style="margin-top:14px;display:flex;gap:8px;"><button class="btn-primary" onclick="window.print()" style="font-size:14px;padding:12px;">🖨️ 印刷する</button></div>';
   closeDetailModal();
   document.getElementById('print-modal').style.display = 'block';
 }
@@ -807,16 +822,16 @@ function printList() {
   var name = (currentMode === 'existing' && selectedResident) ? selectedResident.resident_name : (document.getElementById('resident-name').value.trim() || '未設定');
   var room = (currentMode === 'existing' && selectedResident) ? selectedResident.room_number : document.getElementById('room-number').value.trim();
   var total = currentItems.reduce(function(s, i) { return s + i.count; }, 0);
-  document.getElementById('modal-title').textContent = name + 'さんの持ち物';
+  document.getElementById('modal-title').textContent = '印刷プレビュー';
   document.getElementById('print-content').innerHTML =
     '<div class="print-header-block">'
     + '<div class="print-facility">🏥 ' + currentFacility + '</div>'
     + '<div class="print-name">' + name + ' 様</div>'
     + '<div class="print-meta">' + (room ? room + '　' : '') + new Date().toLocaleDateString('ja-JP') + '　合計 ' + total + ' 点</div>'
     + '</div>'
-    + buildTable(currentItems)
+    + buildTable(currentItems, name, currentFacility)
     + '<div class="print-total">合計 ' + total + ' 点</div>'
-    + '<button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>';
+    + '<div class="no-print" style="margin-top:14px;display:flex;gap:8px;"><button class="btn-primary" onclick="window.print()" style="font-size:14px;padding:12px;">🖨️ 印刷する</button></div>';
   document.getElementById('print-modal').style.display = 'block';
 }
 
