@@ -357,6 +357,7 @@ var detailItems = [];
 var editMode = false;
 var currentFacility = '';
 var currentToken = '';
+var subscriptionActive = true;
 
 function toggleVisibility(id, btn) {
   var input = document.getElementById(id);
@@ -485,21 +486,58 @@ async function checkSubscription() {
     var resp = await fetch('/api/check-subscription?email=' + encodeURIComponent(email));
     var data = await resp.json();
     if (!data.active) {
+      subscriptionActive = false;
       showPaymentBanner();
+      lockFeatures();
     } else if (data.trial) {
+      subscriptionActive = true;
       showTrialBanner(data.trialEnd);
+    } else {
+      subscriptionActive = true;
     }
   } catch(e) {
     console.log('subscription check failed:', e);
   }
 }
 
+function lockFeatures() {
+  // 撮影・登録タブを閲覧不可に
+  var scanTab = document.querySelector('.tab:first-child');
+  if (scanTab) {
+    scanTab.onclick = function() {
+      alert('⚠️ 無料期間が終了しました。月額プランへのご登録が必要です。');
+    };
+    scanTab.style.color = '#c7c7cc';
+  }
+  // 解析ボタンを無効化
+  var analyzeBtn = document.getElementById('analyze-btn');
+  if (analyzeBtn) {
+    analyzeBtn.disabled = true;
+    analyzeBtn.textContent = '月額プランへの登録が必要です';
+  }
+  // 保存ボタンを無効化
+  var saveBtn = document.getElementById('save-btn');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '月額プランへの登録が必要です';
+  }
+  // カメラエリアを無効化
+  var cameraArea = document.querySelector('.camera-area');
+  if (cameraArea) {
+    cameraArea.onclick = function() {
+      alert('⚠️ 無料期間が終了しました。月額プランへのご登録が必要です。');
+    };
+    cameraArea.style.opacity = '0.5';
+    cameraArea.style.cursor = 'not-allowed';
+  }
+}
+
 function showPaymentBanner() {
   var banner = document.getElementById('payment-banner');
   if (banner) {
-    banner.innerHTML = '<div style="background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 16px;text-align:center;font-size:13px;">'
-      + '⚠️ 無料期間が終了しました。引き続きご利用いただくには月額プランへのご登録が必要です。'
-      + '<button onclick="startPayment()" style="margin-left:12px;padding:4px 12px;background:#007aff;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">今すぐ登録する</button>'
+    banner.innerHTML = '<div style="background:#ff3b30;padding:12px 16px;text-align:center;font-size:13px;color:#fff;">'
+      + '⚠️ 無料期間が終了しました。新規登録・保存機能が制限されています。'
+      + '<button onclick="startPayment()" style="margin-left:12px;padding:6px 16px;background:#fff;color:#ff3b30;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">月額プランに登録する（¥1,980/月）</button>'
       + '</div>';
   }
 }
@@ -621,6 +659,10 @@ function handleImage(e) {
 }
 
 async function analyzeImage() {
+  if (!subscriptionActive) {
+    alert('⚠️ 無料期間が終了しました。月額プランへのご登録が必要です。');
+    return;
+  }
   if (!currentImage) return;
   document.getElementById('loading').style.display = 'block';
   document.getElementById('analyze-btn').disabled = true;
@@ -684,6 +726,10 @@ function addManualItem() {
 }
 
 async function saveResident() {
+  if (!subscriptionActive) {
+    alert('⚠️ 無料期間が終了しました。月額プランへのご登録が必要です。');
+    return;
+  }
   var name, room, residentId;
   if (currentMode === 'existing' && selectedResident) {
     name = selectedResident.resident_name; room = selectedResident.room_number; residentId = selectedResident.id;
