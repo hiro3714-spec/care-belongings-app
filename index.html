@@ -261,6 +261,7 @@
   <div class="tabs">
     <div class="tab active" onclick="showTab('scan')">📷 撮影・登録</div>
     <div class="tab" onclick="showTab('list')">👥 入所者一覧</div>
+    <div class="tab" onclick="showTab('lost')">🔍 落とし物</div>
   </div>
   <div class="content">
     <div id="tab-scan">
@@ -316,6 +317,20 @@
         </div>
       </div>
     </div>
+    <div id="tab-lost" style="display:none;">
+      <div class="tip-box">💡 落とし物を撮影すると、登録済みの入居者の中から持ち主の候補をAIが探します</div>
+      <div class="camera-area" onclick="document.getElementById('lost-file-input').click()">
+        <div class="icon">🔍</div>
+        <strong>落とし物を撮影・選択</strong>
+        <p>落とし物の写真を撮影してください</p>
+      </div>
+      <input type="file" id="lost-file-input" accept="image/*" capture="environment" onchange="handleLostImage(event)" style="display:none;">
+      <img id="lost-preview" class="preview-img">
+      <button class="btn-primary" id="search-btn" onclick="searchOwner()" disabled>AIで持ち主を検索する</button>
+      <div class="loading" id="lost-loading" style="display:none;"><div class="spinner"></div><p>AIが持ち主を検索中...</p></div>
+      <div id="lost-result"></div>
+    </div>
+
     <div id="tab-list" style="display:none;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
         <button class="btn-secondary" onclick="exportAllCSV()" style="font-size:13px;padding:8px 16px;width:auto;">📊 全件CSVで保存</button>
@@ -607,8 +622,13 @@ function doLogout() {
 function showTab(tab) {
   document.getElementById('tab-scan').style.display = tab === 'scan' ? 'block' : 'none';
   document.getElementById('tab-list').style.display = tab === 'list' ? 'block' : 'none';
+  document.getElementById('tab-lost').style.display = tab === 'lost' ? 'block' : 'none';
   document.querySelectorAll('.tab').forEach(function(t, i) {
-    t.classList.toggle('active', (tab === 'scan' && i === 0) || (tab === 'list' && i === 1));
+    t.classList.toggle('active',
+      (tab === 'scan' && i === 0) ||
+      (tab === 'list' && i === 1) ||
+      (tab === 'lost' && i === 2)
+    );
   });
   if (tab === 'list') loadResidents();
 }
@@ -1008,6 +1028,81 @@ async function deleteResident(id) {
     closeDetailModal();
     loadResidents();
   } catch(e) { alert('削除に失敗しました'); }
+}
+
+var lostImage = null;
+
+function handleLostImage(e) {
+  var file = e.target.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    lostImage = ev.target.result;
+    var prev = document.getElementById('lost-preview');
+    prev.src = lostImage;
+    prev.style.display = 'block';
+    document.getElementById('search-btn').disabled = false;
+    document.getElementById('lost-result').innerHTML = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function searchOwner() {
+  if (!lostImage) return;
+  document.getElementById('lost-loading').style.display = 'block';
+  document.getElementById('search-btn').disabled = true;
+  document.getElementById('lost-result').innerHTML = '';
+
+  var base64 = lostImage.split(',')[1];
+  var mediaType = lostImage.split(';')[0].split(':')[1];
+
+  try {
+    var resp = await fetch('/api/search-owner', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({image: base64, mediaType: mediaType, facility: currentFacility})
+    });
+    if (!resp.ok) throw new Error('検索に失敗しました');
+    var data = await resp.json();
+    renderSearchResults(data);
+  } catch(e) {
+    document.getElementById('lost-result').innerHTML = '<div class="error-msg">⚠️ ' + e.message + '</div>';
+  }
+  document.getElementById('lost-loading').style.display = 'none';
+  document.getElementById('search-btn').disabled = false;
+}
+
+function renderSearchResults(data) {
+  var result = document.getElementById('lost-result');
+  var lostItem = data.lostItem;
+  var results = data.results;
+
+  var header = '<div style="background:#f0f7ff;border-radius:10px;padding:12px;margin:12px 0;">'
+    + '<div style="font-size:12px;color:#6e6e73;margin-bottom:4px;">AIが分析した落とし物</div>'
+    + '<div style="font-size:15px;font-weight:600;">' + (lostItem.name || '不明') + '</div>'
+    + '<div style="font-size:13px;color:#6e6e73;">' + (lostItem.color || '') + '　' + (lostItem.category || '') + '</div>'
+    + '</div>';
+
+  if (results.length === 0) {
+    result.innerHTML = header + '<div class="empty"><div class="icon">🔍</div>該当する持ち主が見つかりませんでした</div>';
+    return;
+  }
+
+  var list = results.map(function(r, i) {
+    var matchedNames = r.matchedItems.map(function(m) { return m.name; }).join('、');
+    var confidence = i === 0 ? '可能性が高い' : i === 1 ? '可能性あり' : '参考';
+    var badgeColor = i === 0 ? '#34c759' : i === 1 ? '#007aff' : '#6e6e73';
+    return '<div style="background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
+      + '<div style="font-size:15px;font-weight:600;">' + r.resident_name + '</div>'
+      + '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:' + badgeColor + ';color:#fff;">' + confidence + '</span>'
+      + '</div>'
+      + '<div style="font-size:12px;color:#6e6e73;">' + (r.room_number ? r.room_number + '　' : '') + '一致した持ち物：' + matchedNames + '</div>'
+      + '</div>';
+  }).join('');
+
+  result.innerHTML = header
+    + '<div style="font-size:13px;font-weight:600;margin-bottom:8px;">持ち主の候補（' + results.length + '件）</div>'
+    + list;
 }
 
 var checkoutItems = [];
