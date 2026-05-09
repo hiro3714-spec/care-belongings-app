@@ -241,6 +241,7 @@
 </div>
 
 <div id="page-main" class="page">
+  <div id="payment-banner"></div>
   <div class="header">
     <div class="header-left">
       <h1>持ち物管理アプリ</h1>
@@ -369,6 +370,16 @@ function toggleVisibility(id, btn) {
 }
 
 function initSession() {
+  // 決済完了後の処理
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('payment') === 'success') {
+    alert('✅ ご登録ありがとうございます！月額プランが有効になりました。');
+    history.replaceState({}, '', '/');
+  } else if (urlParams.get('payment') === 'cancel') {
+    alert('決済がキャンセルされました。');
+    history.replaceState({}, '', '/');
+  }
+
   var token = localStorage.getItem('token');
   var facility = localStorage.getItem('facility');
   if (token && facility) {
@@ -402,6 +413,7 @@ async function doLogin() {
     currentFacility = data.facility_name;
     localStorage.setItem('token', currentToken);
     localStorage.setItem('facility', currentFacility);
+    localStorage.setItem('email', email);
     showMain();
   } catch(e) { msg.innerHTML = '<div class="auth-error">エラーが発生しました</div>'; }
 }
@@ -457,16 +469,73 @@ async function doUpdatePassword() {
   } catch(e) { msg.innerHTML = '<div class="auth-error">エラーが発生しました</div>'; }
 }
 
-function showMain() {
+async function showMain() {
   document.getElementById('page-auth').classList.remove('active');
   document.getElementById('page-main').classList.add('active');
   document.getElementById('header-facility').textContent = '🏥 ' + currentFacility;
   loadResidents();
+  checkSubscription();
+}
+
+async function checkSubscription() {
+  try {
+    var email = localStorage.getItem('email') || '';
+    if (!email) return;
+    var resp = await fetch('/api/check-subscription?email=' + encodeURIComponent(email));
+    var data = await resp.json();
+    if (!data.active) {
+      showPaymentBanner();
+    } else if (data.trial) {
+      showTrialBanner(data.trialEnd);
+    }
+  } catch(e) {
+    console.log('subscription check failed:', e);
+  }
+}
+
+function showPaymentBanner() {
+  var banner = document.getElementById('payment-banner');
+  if (banner) {
+    banner.innerHTML = '<div style="background:#fff3cd;border-bottom:1px solid #ffc107;padding:10px 16px;text-align:center;font-size:13px;">'
+      + '⚠️ 無料期間が終了しました。引き続きご利用いただくには月額プランへのご登録が必要です。'
+      + '<button onclick="startPayment()" style="margin-left:12px;padding:4px 12px;background:#007aff;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;">今すぐ登録する</button>'
+      + '</div>';
+  }
+}
+
+function showTrialBanner(trialEnd) {
+  var banner = document.getElementById('payment-banner');
+  if (banner) {
+    banner.innerHTML = '<div style="background:#d4edda;border-bottom:1px solid #28a745;padding:8px 16px;text-align:center;font-size:13px;color:#155724;">'
+      + '✅ 無料トライアル中（' + (trialEnd || '') + 'まで）'
+      + '</div>';
+  }
+}
+
+async function startPayment() {
+  var email = localStorage.getItem('email') || '';
+  if (!email) { alert('ログインし直してください'); return; }
+  try {
+    var resp = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email: email, facility_name: currentFacility})
+    });
+    var data = await resp.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('決済ページの作成に失敗しました');
+    }
+  } catch(e) {
+    alert('エラーが発生しました');
+  }
 }
 
 function doLogout() {
   localStorage.removeItem('token');
   localStorage.removeItem('facility');
+  localStorage.removeItem('email');
   currentToken = ''; currentFacility = '';
   document.getElementById('page-main').classList.remove('active');
   document.getElementById('page-auth').classList.add('active');
