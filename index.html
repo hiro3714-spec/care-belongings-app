@@ -116,12 +116,23 @@
     .edit-toggle { font-size: 13px; color: #007aff; cursor: pointer; padding: 4px 10px; border: 1px solid #007aff; border-radius: 8px; background: #fff; }
     .divider { height: 1px; background: #e5e5ea; margin: 14px 0; }
     @media print {
-      body { background: #fff; }
+      @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
+      body { background: #fff; font-size: 12pt; }
       .page { display: none !important; }
       #print-modal { display: block !important; position: static; background: none; }
-      .modal-inner { margin: 0; padding: 0; }
+      .modal-inner { margin: 0; padding: 0; box-shadow: none; }
       .no-print { display: none !important; }
+      table { width: 100%; border-collapse: collapse; font-size: 10pt; page-break-inside: auto; }
+      tr { page-break-inside: avoid; }
+      th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-cat-title { page-break-after: avoid; margin-top: 12pt; }
+      .print-header-block { margin-bottom: 16pt; }
     }
+    .print-header-block { padding-bottom: 14px; border-bottom: 2px solid #1d1d1f; margin-bottom: 16px; }
+    .print-facility { font-size: 13px; color: #007aff; margin-bottom: 6px; font-weight: 500; }
+    .print-name { font-size: 24px; font-weight: 700; margin-bottom: 6px; color: #1d1d1f; }
+    .print-meta { font-size: 13px; color: #6e6e73; }
+    .print-total { text-align: right; font-size: 13px; color: #1d1d1f; font-weight: 600; margin-top: 12px; border-top: 1px solid #e5e5ea; padding-top: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { text-align: left; padding: 8px 6px; font-weight: 600; border-bottom: 2px solid #1d1d1f; font-size: 12px; }
     td { padding: 8px 6px; border-bottom: 1px solid #e5e5ea; }
@@ -756,12 +767,23 @@ function buildTable(items) {
     var icon = CATS[cat] ? CATS[cat].icon : '📦';
     var rows = catItems.map(function(item) {
       var colorCell = (item.color && item.color !== 'なし')
-        ? '<span class="color-dot" style="background:' + item.colorCode + '"></span>' + item.color
+        ? '<span class="color-dot" style="background:' + (item.colorCode || '#888') + ';display:inline-block;width:10px;height:10px;border-radius:2px;border:1px solid #ccc;vertical-align:middle;margin-right:4px;"></span>' + item.color
         : '—';
-      return '<tr><td>' + item.name + '</td><td>' + colorCell + '</td><td>' + item.count + '</td><td style="color:#6e6e73;">' + (item.note || '') + '</td></tr>';
+      return '<tr>'
+        + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;">' + item.name + '</td>'
+        + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;">' + colorCell + '</td>'
+        + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;text-align:center;">' + item.count + '</td>'
+        + '<td style="padding:7px 8px;border-bottom:1px solid #e5e5ea;color:#6e6e73;">' + (item.note || '') + '</td>'
+        + '</tr>';
     }).join('');
-    return '<div class="print-cat-title">' + icon + ' ' + cat + '</div>'
-      + '<table><thead><tr><th>品目</th><th>色・詳細</th><th>数</th><th>備考</th></tr></thead><tbody>' + rows + '</tbody></table>';
+    return '<div class="print-cat-title" style="font-size:13px;font-weight:700;color:#1d1d1f;margin:14px 0 4px;padding:4px 8px;background:#f0f0f0;border-left:3px solid #007aff;">' + icon + ' ' + cat + '</div>'
+      + '<table style="width:100%;border-collapse:collapse;font-size:11px;">'
+      + '<thead><tr style="background:#f8f8f8;">'
+      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:35%;">品目</th>'
+      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:25%;">色・詳細</th>'
+      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:center;font-size:11px;width:10%;">数</th>'
+      + '<th style="padding:7px 8px;border-bottom:2px solid #1d1d1f;text-align:left;font-size:11px;width:30%;">備考</th>'
+      + '</tr></thead><tbody>' + rows + '</tbody></table>';
   }).join('');
 }
 
@@ -769,12 +791,13 @@ function printFromDetail() {
   var total = detailItems.reduce(function(s, i) { return s + i.count; }, 0);
   document.getElementById('modal-title').textContent = detailResident.resident_name + 'さんの持ち物';
   document.getElementById('print-content').innerHTML =
-    '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e5e5ea;">'
-    + '<p style="font-size:13px;color:#007aff;margin-bottom:4px;">🏥 ' + currentFacility + '</p>'
-    + '<p style="font-size:17px;font-weight:600;">' + detailResident.resident_name + '</p>'
-    + '<p style="font-size:13px;color:#6e6e73;">' + (detailResident.room_number ? detailResident.room_number + '　' : '') + '更新日：' + detailResident.registered_date + '　合計 ' + total + ' 点</p>'
-    + '</div>' + buildTable(detailItems)
-    + '<p style="text-align:right;font-size:12px;color:#6e6e73;margin-top:10px;">合計 ' + total + ' 点</p>'
+    '<div class="print-header-block">'
+    + '<div class="print-facility">🏥 ' + currentFacility + '</div>'
+    + '<div class="print-name">' + detailResident.resident_name + ' 様</div>'
+    + '<div class="print-meta">' + (detailResident.room_number ? detailResident.room_number + '　' : '') + '登録日：' + detailResident.registered_date + '　合計 ' + total + ' 点</div>'
+    + '</div>'
+    + buildTable(detailItems)
+    + '<div class="print-total">合計 ' + total + ' 点</div>'
     + '<button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>';
   closeDetailModal();
   document.getElementById('print-modal').style.display = 'block';
@@ -786,12 +809,13 @@ function printList() {
   var total = currentItems.reduce(function(s, i) { return s + i.count; }, 0);
   document.getElementById('modal-title').textContent = name + 'さんの持ち物';
   document.getElementById('print-content').innerHTML =
-    '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e5e5ea;">'
-    + '<p style="font-size:13px;color:#007aff;margin-bottom:4px;">🏥 ' + currentFacility + '</p>'
-    + '<p style="font-size:17px;font-weight:600;">' + name + '</p>'
-    + '<p style="font-size:13px;color:#6e6e73;">' + (room ? room + '　' : '') + new Date().toLocaleDateString('ja-JP') + '　合計 ' + total + ' 点</p>'
-    + '</div>' + buildTable(currentItems)
-    + '<p style="text-align:right;font-size:12px;color:#6e6e73;margin-top:10px;">合計 ' + total + ' 点</p>'
+    '<div class="print-header-block">'
+    + '<div class="print-facility">🏥 ' + currentFacility + '</div>'
+    + '<div class="print-name">' + name + ' 様</div>'
+    + '<div class="print-meta">' + (room ? room + '　' : '') + new Date().toLocaleDateString('ja-JP') + '　合計 ' + total + ' 点</div>'
+    + '</div>'
+    + buildTable(currentItems)
+    + '<div class="print-total">合計 ' + total + ' 点</div>'
     + '<button class="btn-primary no-print" onclick="window.print()" style="margin-top:14px;font-size:14px;padding:12px;">印刷する</button>';
   document.getElementById('print-modal').style.display = 'block';
 }
