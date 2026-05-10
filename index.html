@@ -387,6 +387,73 @@
   </div>
 </div>
 
+<!-- 利用規約モーダル -->
+<div class="modal" id="terms-modal" style="display:none;">
+  <div class="modal-inner" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-header">
+      <h2>📋 利用規約</h2>
+    </div>
+    <div style="font-size:13px;line-height:1.8;color:#333;">
+      <p style="margin-bottom:16px;">この利用規約（以下「本規約」）は、持ち物管理アプリ（以下「本サービス」）の利用条件を定めるものです。ご登録の前に必ずお読みください。</p>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第1条（目的）</div>
+        <p>本サービスは、介護施設における入所者の持ち物管理を効率化することを目的としたWebアプリケーションです。</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第2条（免責事項）</div>
+        <p style="margin-bottom:8px;">① 本サービスの記録は参考情報であり、実際の持ち物の有無・状態・数量を保証するものではありません。</p>
+        <p style="margin-bottom:8px;">② 本サービスを利用したことによって生じた持ち物の紛失・破損・盗難等のトラブルについて、サービス提供者は一切の責任を負いません。</p>
+        <p style="margin-bottom:8px;">③ AI解析による認識結果は100%正確ではありません。最終確認は必ず人間が行ってください。</p>
+        <p>④ システム障害・通信障害によるデータの消失について、サービス提供者は責任を負いません。</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第3条（禁止事項）</div>
+        <p style="margin-bottom:8px;">① 他の施設のデータへの不正アクセス</p>
+        <p style="margin-bottom:8px;">② 本サービスを介護施設以外の目的での利用</p>
+        <p style="margin-bottom:8px;">③ 取得した個人情報の第三者への提供・漏洩</p>
+        <p>④ 本サービスの逆コンパイル・改ざん・複製</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第4条（個人情報の取扱い）</div>
+        <p style="margin-bottom:8px;">① 登録された入所者情報は、施設の持ち物管理目的のみに使用します。</p>
+        <p style="margin-bottom:8px;">② 入所者の氏名・部屋番号・持ち物情報は施設内での管理に限定し、第三者に提供しません。</p>
+        <p>③ 撮影した写真はAI解析後に破棄され、サーバーには保存されません。</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第5条（料金・解約）</div>
+        <p style="margin-bottom:8px;">① 登録から90日間は無料でご利用いただけます。</p>
+        <p style="margin-bottom:8px;">② 無料期間終了後は月額1,980円（税込）が発生します。</p>
+        <p>③ 解約はいつでも可能です。解約後は月末まで利用できます。</p>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第6条（規約の変更）</div>
+        <p>本規約は予告なく変更される場合があります。変更後も本サービスを継続利用した場合、新しい規約に同意したものとみなします。</p>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <div style="font-size:14px;font-weight:700;color:#1d1d1f;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid #007aff;">第7条（準拠法）</div>
+        <p>本規約は日本法に準拠し、紛争が生じた場合は日本の裁判所を管轄とします。</p>
+      </div>
+
+      <div style="background:#f0f7ff;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="terms-agree-check" style="margin-top:2px;width:18px;height:18px;flex-shrink:0;">
+          <span style="font-size:13px;font-weight:500;color:#1d1d1f;">上記の利用規約を読み、内容に同意します</span>
+        </label>
+      </div>
+
+      <button id="terms-agree-btn" onclick="agreeTerms()" style="width:100%;padding:14px;background:#c7c7cc;color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:not-allowed;" disabled>同意して登録する</button>
+      <button onclick="declineTerms()" style="width:100%;padding:12px;background:none;border:none;color:#6e6e73;font-size:14px;cursor:pointer;margin-top:8px;">同意しない（登録をキャンセル）</button>
+    </div>
+  </div>
+</div>
+
 <!-- 退所チェックモーダル -->
 <div class="modal" id="checkout-modal">
   <div class="modal-inner">
@@ -496,6 +563,8 @@ async function doLogin() {
   } catch(e) { msg.innerHTML = '<div class="auth-error">エラーが発生しました</div>'; }
 }
 
+var pendingSignup = null;
+
 async function doSignup() {
   var facility = document.getElementById('signup-facility').value.trim();
   var email = document.getElementById('signup-email').value.trim();
@@ -503,14 +572,53 @@ async function doSignup() {
   var msg = document.getElementById('signup-msg');
   if (!facility || !email || !password) { msg.innerHTML = '<div class="auth-error">全項目を入力してください</div>'; return; }
   if (password.length < 6) { msg.innerHTML = '<div class="auth-error">パスワードは6文字以上にしてください</div>'; return; }
+  // 入力内容を保持して利用規約を表示
+  pendingSignup = { facility: facility, email: email, password: password };
+  document.getElementById('terms-agree-check').checked = false;
+  document.getElementById('terms-agree-btn').disabled = true;
+  document.getElementById('terms-agree-btn').style.background = '#c7c7cc';
+  document.getElementById('terms-agree-btn').style.cursor = 'not-allowed';
+  document.getElementById('terms-modal').style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var check = document.getElementById('terms-agree-check');
+  if (check) {
+    check.addEventListener('change', function() {
+      var btn = document.getElementById('terms-agree-btn');
+      if (this.checked) {
+        btn.disabled = false;
+        btn.style.background = '#007aff';
+        btn.style.cursor = 'pointer';
+      } else {
+        btn.disabled = true;
+        btn.style.background = '#c7c7cc';
+        btn.style.cursor = 'not-allowed';
+      }
+    });
+  }
+});
+
+async function agreeTerms() {
+  if (!pendingSignup) return;
+  document.getElementById('terms-modal').style.display = 'none';
+  var msg = document.getElementById('signup-msg');
   msg.innerHTML = '<div style="text-align:center;padding:8px;color:#6e6e73;font-size:13px;">登録中...</div>';
   try {
-    var resp = await fetch('/api/auth-signup', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:email, password:password, facility_name:facility})});
+    var resp = await fetch('/api/auth-signup', {method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:pendingSignup.email, password:pendingSignup.password, facility_name:pendingSignup.facility})});
     var data = await resp.json();
     if (!resp.ok) { msg.innerHTML = '<div class="auth-error">' + data.error + '</div>'; return; }
     msg.innerHTML = '<div class="auth-success">✅ 登録しました！ログインしてください。</div>';
+    pendingSignup = null;
     setTimeout(function() { switchAuthTab('login'); }, 2000);
   } catch(e) { msg.innerHTML = '<div class="auth-error">エラーが発生しました</div>'; }
+}
+
+function declineTerms() {
+  document.getElementById('terms-modal').style.display = 'none';
+  pendingSignup = null;
+  document.getElementById('signup-msg').innerHTML = '<div class="auth-error">利用規約に同意いただけないと登録できません。</div>';
 }
 
 async function doReset() {
