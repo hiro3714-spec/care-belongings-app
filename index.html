@@ -310,7 +310,6 @@
                 <option value="日用品">🪥 日用品</option>
                 <option value="食料品">🍱 食料品</option>
                 <option value="貴重品">💼 貴重品</option>
-                <option value="お金">💰 お金</option>
                 <option value="電化製品">📺 電化製品</option>
                 <option value="趣味・娯楽">📚 趣味・娯楽</option>
                 <option value="医療用品">👓 医療用品</option>
@@ -419,7 +418,6 @@ var CATS = {
   '日用品':    {icon:'🪥'},
   '食料品':    {icon:'🍱'},
   '貴重品':    {icon:'💼'},
-  'お金':      {icon:'💰'},
   '電化製品':  {icon:'📺'},
   '趣味・娯楽':{icon:'📚'},
   '医療用品':  {icon:'👓'},
@@ -1154,43 +1152,14 @@ function onManualCatChange() {
   var colorField = document.getElementById('manual-color-field');
   var countField = document.getElementById('manual-count-field');
   var moneyField = document.getElementById('manual-money-field');
-  if (cat === 'お金') {
-    nameField.style.display = 'none';
-    colorField.style.display = 'none';
-    countField.style.display = 'none';
-    moneyField.style.display = 'block';
-  } else {
-    nameField.style.display = 'block';
-    colorField.style.display = 'block';
-    countField.style.display = 'block';
-    moneyField.style.display = 'none';
-  }
+  nameField.style.display = 'block';
+  colorField.style.display = 'block';
+  countField.style.display = 'block';
+  moneyField.style.display = 'none';
 }
 
 function addManualInputItem() {
   var cat = document.getElementById('manual-cat').value;
-
-  // お金カテゴリーの特別処理
-  if (cat === 'お金') {
-    var amount = document.getElementById('manual-amount').value.trim();
-    if (!amount || isNaN(parseInt(amount))) {
-      document.getElementById('manual-amount').focus();
-      return;
-    }
-    var amountNum = parseInt(amount).toLocaleString('ja-JP');
-    var newItem = { category: 'お金', name: amountNum + '円', color: 'なし', colorCode: '#f39c12', count: 1, note: '' };
-    currentItems.push(newItem);
-    manualItems.push(newItem);
-    renderItems();
-    document.getElementById('result-area').style.display = 'block';
-    var titleEl = document.getElementById('result-title');
-    var quickAddRow = document.getElementById('quick-add-row');
-    if (titleEl) titleEl.textContent = '登録内容';
-    if (quickAddRow) quickAddRow.style.display = 'none';
-    document.getElementById('manual-amount').value = '';
-    document.getElementById('manual-amount').focus();
-    return;
-  }
 
   var name = document.getElementById('manual-name').value.trim();
   var count = parseInt(document.getElementById('manual-count').value) || 1;
