@@ -305,7 +305,7 @@
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
             <div>
               <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">カテゴリー</label>
-              <select id="manual-cat" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;background:#fff;">
+              <select id="manual-cat" onchange="onManualCatChange()" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;background:#fff;">
                 <option value="衣類">👕 衣類</option>
                 <option value="日用品">🪥 日用品</option>
                 <option value="食料品">🍱 食料品</option>
@@ -317,18 +317,25 @@
                 <option value="その他">📦 その他</option>
               </select>
             </div>
-            <div>
+            <div id="manual-count-field">
               <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">🔢 数量</label>
               <input type="number" id="manual-count" value="1" min="1" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;">
             </div>
           </div>
-          <div style="margin-bottom:10px;">
+          <div id="manual-name-field" style="margin-bottom:10px;">
             <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">品目名</label>
             <input type="text" id="manual-name" placeholder="例：パジャマ、タオル、歯ブラシ" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
           </div>
-          <div style="margin-bottom:10px;">
+          <div id="manual-color-field" style="margin-bottom:10px;">
             <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">🎨 色（任意）</label>
             <input type="text" id="manual-color" placeholder="例：白、ネイビー" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
+          </div>
+          <div id="manual-money-field" style="display:none;margin-bottom:10px;">
+            <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">💰 金額</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="number" id="manual-amount" placeholder="例：5000" min="0" style="flex:1;font-size:18px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;text-align:right;" onkeydown="if(event.key==='Enter')addManualInputItem()">
+              <span style="font-size:16px;font-weight:600;color:#1d1d1f;">円</span>
+            </div>
           </div>
           <button onclick="addManualInputItem()" style="width:100%;padding:12px;background:#007aff;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">＋ 追加する</button>
         </div>
@@ -1105,9 +1112,51 @@ function setInputMode(mode) {
   }
 }
 
-function addManualInputItem() {
-  var name = document.getElementById('manual-name').value.trim();
+function onManualCatChange() {
   var cat = document.getElementById('manual-cat').value;
+  var nameField = document.getElementById('manual-name-field');
+  var colorField = document.getElementById('manual-color-field');
+  var countField = document.getElementById('manual-count-field');
+  var moneyField = document.getElementById('manual-money-field');
+  if (cat === 'お金') {
+    nameField.style.display = 'none';
+    colorField.style.display = 'none';
+    countField.style.display = 'none';
+    moneyField.style.display = 'block';
+  } else {
+    nameField.style.display = 'block';
+    colorField.style.display = 'block';
+    countField.style.display = 'block';
+    moneyField.style.display = 'none';
+  }
+}
+
+function addManualInputItem() {
+  var cat = document.getElementById('manual-cat').value;
+
+  // お金カテゴリーの特別処理
+  if (cat === 'お金') {
+    var amount = document.getElementById('manual-amount').value.trim();
+    if (!amount || isNaN(parseInt(amount))) {
+      document.getElementById('manual-amount').focus();
+      return;
+    }
+    var amountNum = parseInt(amount).toLocaleString('ja-JP');
+    var newItem = { category: 'お金', name: amountNum + '円', color: 'なし', colorCode: '#f39c12', count: 1, note: '' };
+    currentItems.push(newItem);
+    manualItems.push(newItem);
+    renderItems();
+    document.getElementById('result-area').style.display = 'block';
+    var titleEl = document.getElementById('result-title');
+    var quickAddRow = document.getElementById('quick-add-row');
+    if (titleEl) titleEl.textContent = '登録内容';
+    if (quickAddRow) quickAddRow.style.display = 'none';
+    document.getElementById('manual-amount').value = '';
+    document.getElementById('manual-amount').focus();
+    return;
+  }
+
+  var name = document.getElementById('manual-name').value.trim();
   var count = parseInt(document.getElementById('manual-count').value) || 1;
   var color = document.getElementById('manual-color').value.trim();
   if (!name) {
