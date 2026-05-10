@@ -970,10 +970,19 @@ function setInputMode(mode) {
   document.getElementById('camera-input-area').style.display = mode === 'camera' ? 'block' : 'none';
   document.getElementById('manual-input-area').style.display = mode === 'manual' ? 'block' : 'none';
   if (mode === 'manual') {
-    document.getElementById('result-area').style.display = currentItems.length > 0 ? 'block' : 'none';
-    if (currentItems.length === 0) {
+    // 手入力モード：アイテムがあれば表示、なければ非表示
+    if (currentItems.length > 0) {
       document.getElementById('result-area').style.display = 'block';
       renderItems();
+    } else {
+      document.getElementById('result-area').style.display = 'none';
+    }
+  } else {
+    // カメラモード：アイテムがあれば表示、なければ非表示
+    if (currentItems.length > 0) {
+      document.getElementById('result-area').style.display = 'block';
+    } else {
+      document.getElementById('result-area').style.display = 'none';
     }
   }
 }
