@@ -128,7 +128,7 @@ function doLogout() {
 async function loadData() {
   document.getElementById('table-container').innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
   try {
-    var resp = await fetch('/api/admin-facilities?password=' + encodeURIComponent(adminPassword));
+    var resp = await fetch('/api/residents?admin=true&password=' + encodeURIComponent(adminPassword));
     var data = await resp.json();
     if (!resp.ok) {
       if (resp.status === 401) {
