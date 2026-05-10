@@ -338,20 +338,8 @@
           <h3 id="result-title">解析結果</h3>
           <span class="badge" id="item-count-badge">0点</span>
         </div>
+        <div style="font-size:11px;color:#6e6e73;margin-bottom:6px;" id="edit-hint">✏️ タップして編集・削除できます</div>
         <div id="items-by-category"></div>
-        <div class="add-row" id="quick-add-row">
-          <select id="new-cat">
-            <option value="衣類">👕 衣類</option>
-            <option value="日用品">🪥 日用品</option>
-            <option value="貴重品">💼 貴重品</option>
-            <option value="電化製品">📺 電化製品</option>
-            <option value="趣味・娯楽">📚 趣味・娯楽</option>
-            <option value="医療用品">👓 医療用品</option>
-            <option value="その他">📦 その他</option>
-          </select>
-          <input type="text" id="new-item" placeholder="手動で追加">
-          <button onclick="addManualItem()">追加</button>
-        </div>
         <div class="action-btns">
           <button class="btn-primary" id="save-btn" onclick="saveResident()" style="font-size:14px;padding:12px;">保存する</button>
           <button class="btn-secondary" onclick="printList()">印刷プレビュー</button>
@@ -781,23 +769,111 @@ function renderItems() {
     container.innerHTML = '<div class="items-card"><div style="padding:16px;text-align:center;color:#6e6e73;font-size:14px;">持ち物が検出されませんでした</div></div>';
     return;
   }
-  container.innerHTML = Object.keys(grouped).map(function(cat) {
+  container.innerHTML = '';
+  Object.keys(grouped).forEach(function(cat) {
     var items = grouped[cat];
     var icon = CATS[cat] ? CATS[cat].icon : '📦';
-    return '<div class="cat-section">'
-      + '<div class="cat-header">' + icon + ' ' + cat + '（' + items.length + '点）</div>'
-      + '<div class="items-card">'
-      + items.map(function(item) {
-        var detail = [item.color && item.color !== 'なし' ? item.color : '', item.note || ''].filter(Boolean).join('　');
-        return '<div class="item-row">'
-          + '<div class="item-dot" style="background:' + (item.colorCode || '#ccc') + '"></div>'
-          + '<div class="item-info"><div class="item-name">' + item.name + '</div><div class="item-detail">' + detail + '</div></div>'
-          + '<div class="item-count">' + item.count + '点</div>'
-          + '<div class="item-del" onclick="removeItem(' + item._idx + ')">×</div>'
-          + '</div>';
-      }).join('')
-      + '</div></div>';
-  }).join('');
+    var section = document.createElement('div');
+    section.className = 'cat-section';
+    var header = document.createElement('div');
+    header.className = 'cat-header';
+    header.textContent = icon + ' ' + cat + '（' + items.length + '点）';
+    section.appendChild(header);
+    var card = document.createElement('div');
+    card.className = 'items-card';
+    items.forEach(function(item) {
+      var idx2 = item._idx;
+      var row = document.createElement('div');
+      row.style.cssText = 'padding:10px 0;border-bottom:1px solid #f2f2f7;';
+
+      var topRow = document.createElement('div');
+      topRow.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+
+      var dot = document.createElement('div');
+      dot.className = 'item-dot';
+      dot.style.background = item.colorCode || '#ccc';
+      dot.style.flexShrink = '0';
+      topRow.appendChild(dot);
+
+      var sel = document.createElement('select');
+      sel.style.cssText = 'flex:1;font-size:12px;padding:4px 6px;border:1px solid #e5e5ea;border-radius:6px;';
+      Object.keys(CATS).forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = CATS[c].icon + ' ' + c;
+        if (item.category === c) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', (function(i){ return function(){ updateItem(i,'category',this.value); }; })(idx2));
+      topRow.appendChild(sel);
+
+      var delBtn = document.createElement('div');
+      delBtn.className = 'item-del';
+      delBtn.style.cssText = 'font-size:18px;color:#c7c7cc;cursor:pointer;padding:4px;';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', (function(i){ return function(){ removeItem(i); }; })(idx2));
+      topRow.appendChild(delBtn);
+      row.appendChild(topRow);
+
+      var bottomRow = document.createElement('div');
+      bottomRow.style.cssText = 'display:flex;gap:6px;';
+
+      var nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.value = item.name;
+      nameInput.placeholder = '品目名';
+      nameInput.style.cssText = 'flex:2;font-size:13px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      nameInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'name',this.value); }; })(idx2));
+      bottomRow.appendChild(nameInput);
+
+      var colorVal = (item.color && item.color !== 'なし') ? item.color : '';
+      var colorInput = document.createElement('input');
+      colorInput.type = 'text';
+      colorInput.value = colorVal;
+      colorInput.placeholder = '色';
+      colorInput.style.cssText = 'flex:1;font-size:12px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      colorInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'color',this.value); }; })(idx2));
+      bottomRow.appendChild(colorInput);
+
+      var countInput = document.createElement('input');
+      countInput.type = 'number';
+      countInput.value = item.count;
+      countInput.min = '1';
+      countInput.placeholder = '数';
+      countInput.style.cssText = 'width:52px;font-size:12px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      countInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'count',parseInt(this.value)||1); }; })(idx2));
+      bottomRow.appendChild(countInput);
+
+      row.appendChild(bottomRow);
+      card.appendChild(row);
+    });
+    section.appendChild(card);
+    container.appendChild(section);
+  });
+}
+
+
+function updateItem(idx, field, value) {
+  if (field === 'count') {
+    currentItems[idx][field] = value;
+  } else if (field === 'color') {
+    currentItems[idx][field] = value || 'なし';
+    var colorMap = {
+      '白': '#ffffff', 'しろ': '#ffffff', '黒': '#222222', 'くろ': '#222222',
+      '赤': '#e74c3c', 'あか': '#e74c3c', '青': '#3498db', 'あお': '#3498db',
+      '緑': '#27ae60', 'みどり': '#27ae60', '黄': '#f1c40f', 'きいろ': '#f1c40f',
+      'ピンク': '#ff69b4', '紫': '#9b59b6', 'むらさき': '#9b59b6',
+      'オレンジ': '#e67e22', '茶': '#8B4513', 'グレー': '#95a5a6', '灰': '#95a5a6',
+      'ネイビー': '#2c3e50', '紺': '#2c3e50', 'ベージュ': '#f5deb3', 'クリーム': '#fffdd0'
+    };
+    var colorCode = '#888888';
+    for (var key in colorMap) {
+      if (value.includes(key)) { colorCode = colorMap[key]; break; }
+    }
+    currentItems[idx].colorCode = colorCode;
+  } else {
+    currentItems[idx][field] = value;
+  }
 }
 
 function removeItem(i) { currentItems.splice(i, 1); renderItems(); }
@@ -977,10 +1053,11 @@ function setInputMode(mode) {
   var titleEl = document.getElementById('result-title');
   var quickAddRow = document.getElementById('quick-add-row');
 
+  var editHint = document.getElementById('edit-hint');
   if (mode === 'manual') {
     // 手入力モード：手入力アイテムのみ表示
     if (titleEl) titleEl.textContent = '登録内容';
-    if (quickAddRow) quickAddRow.style.display = 'none';
+    if (editHint) editHint.style.display = 'none';
     currentItems = manualItems.slice();
     if (currentItems.length > 0) {
       document.getElementById('result-area').style.display = 'block';
@@ -991,7 +1068,7 @@ function setInputMode(mode) {
   } else {
     // カメラモード：カメラ解析アイテムのみ表示
     if (titleEl) titleEl.textContent = '解析結果';
-    if (quickAddRow) quickAddRow.style.display = 'flex';
+    if (editHint) editHint.style.display = 'block';
     currentItems = cameraItems.slice();
     if (currentItems.length > 0) {
       document.getElementById('result-area').style.display = 'block';
