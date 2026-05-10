@@ -815,36 +815,58 @@ function renderItems() {
       topRow.appendChild(delBtn);
       row.appendChild(topRow);
 
-      var bottomRow = document.createElement('div');
-      bottomRow.style.cssText = 'display:flex;gap:6px;';
-
+      // 品目名
+      var nameWrap = document.createElement('div');
+      nameWrap.style.cssText = 'margin-bottom:5px;';
+      var nameLabel = document.createElement('div');
+      nameLabel.style.cssText = 'font-size:10px;color:#6e6e73;margin-bottom:2px;';
+      nameLabel.textContent = '品目名';
+      nameWrap.appendChild(nameLabel);
       var nameInput = document.createElement('input');
       nameInput.type = 'text';
       nameInput.value = item.name;
       nameInput.placeholder = '品目名';
-      nameInput.style.cssText = 'flex:2;font-size:13px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      nameInput.style.cssText = 'width:100%;font-size:13px;padding:6px 8px;border:1px solid #e5e5ea;border-radius:6px;';
       nameInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'name',this.value); }; })(idx2));
-      bottomRow.appendChild(nameInput);
+      nameWrap.appendChild(nameInput);
+      row.appendChild(nameWrap);
 
+      // 色と数量を横並び
+      var colorCountRow = document.createElement('div');
+      colorCountRow.style.cssText = 'display:flex;gap:6px;';
+
+      var colorWrap = document.createElement('div');
+      colorWrap.style.cssText = 'flex:1;';
+      var colorLabel = document.createElement('div');
+      colorLabel.style.cssText = 'font-size:10px;color:#6e6e73;margin-bottom:2px;';
+      colorLabel.textContent = '🎨 色';
+      colorWrap.appendChild(colorLabel);
       var colorVal = (item.color && item.color !== 'なし') ? item.color : '';
       var colorInput = document.createElement('input');
       colorInput.type = 'text';
       colorInput.value = colorVal;
-      colorInput.placeholder = '色';
-      colorInput.style.cssText = 'flex:1;font-size:12px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      colorInput.placeholder = '例：白、ネイビー';
+      colorInput.style.cssText = 'width:100%;font-size:12px;padding:6px 8px;border:1px solid #e5e5ea;border-radius:6px;';
       colorInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'color',this.value); }; })(idx2));
-      bottomRow.appendChild(colorInput);
+      colorWrap.appendChild(colorInput);
+      colorCountRow.appendChild(colorWrap);
 
+      var countWrap = document.createElement('div');
+      countWrap.style.cssText = 'width:80px;';
+      var countLabel = document.createElement('div');
+      countLabel.style.cssText = 'font-size:10px;color:#6e6e73;margin-bottom:2px;';
+      countLabel.textContent = '🔢 数量';
+      countWrap.appendChild(countLabel);
       var countInput = document.createElement('input');
       countInput.type = 'number';
       countInput.value = item.count;
       countInput.min = '1';
-      countInput.placeholder = '数';
-      countInput.style.cssText = 'width:52px;font-size:12px;padding:5px 8px;border:1px solid #e5e5ea;border-radius:6px;';
+      countInput.style.cssText = 'width:100%;font-size:13px;padding:6px 8px;border:1px solid #e5e5ea;border-radius:6px;';
       countInput.addEventListener('change', (function(i){ return function(){ updateItem(i,'count',parseInt(this.value)||1); }; })(idx2));
-      bottomRow.appendChild(countInput);
+      countWrap.appendChild(countInput);
+      colorCountRow.appendChild(countWrap);
 
-      row.appendChild(bottomRow);
+      row.appendChild(colorCountRow);
       card.appendChild(row);
     });
     section.appendChild(card);
