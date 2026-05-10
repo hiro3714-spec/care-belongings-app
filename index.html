@@ -760,6 +760,7 @@ async function analyzeImage() {
     if (!resp.ok) { var err = await resp.json(); throw new Error(err.error); }
     var data = await resp.json();
     currentItems = data.items || [];
+    cameraItems = currentItems.slice();
     renderItems();
     document.getElementById('result-area').style.display = 'block';
   } catch(e) { document.getElementById('error-area').innerHTML = '<div class="error-msg">⚠️ ' + e.message + '</div>'; }
@@ -836,7 +837,7 @@ async function saveResident() {
     document.getElementById('result-area').style.display = 'none';
     document.getElementById('preview').style.display = 'none';
     document.getElementById('analyze-btn').disabled = true;
-    currentImage = null; currentItems = [];
+    currentImage = null; currentItems = []; cameraItems = []; manualItems = [];
     if (currentMode === 'existing') { clearSelection(); loadResidentSelect(); }
   } catch(e) { document.getElementById('error-area').innerHTML = '<div class="error-msg">⚠️ 保存に失敗：' + e.message + '</div>'; }
   btn.disabled = false; btn.textContent = '保存する';
@@ -964,24 +965,40 @@ function renderDetailModal() {
   document.getElementById('detail-content').innerHTML = html;
 }
 
+var cameraItems = [];  // カメラで解析したアイテム
+var manualItems = [];  // 手入力したアイテム
+
 function setInputMode(mode) {
   document.getElementById('input-mode-camera').classList.toggle('active', mode === 'camera');
   document.getElementById('input-mode-manual').classList.toggle('active', mode === 'manual');
   document.getElementById('camera-input-area').style.display = mode === 'camera' ? 'block' : 'none';
   document.getElementById('manual-input-area').style.display = mode === 'manual' ? 'block' : 'none';
 
-  // タイトルと手動追加行を切り替え
   var titleEl = document.getElementById('result-title');
   var quickAddRow = document.getElementById('quick-add-row');
-  if (titleEl) titleEl.textContent = mode === 'manual' ? '登録内容' : '解析結果';
-  if (quickAddRow) quickAddRow.style.display = mode === 'manual' ? 'none' : 'flex';
 
-  // 結果エリアの表示制御
-  if (currentItems.length > 0) {
-    document.getElementById('result-area').style.display = 'block';
-    renderItems();
+  if (mode === 'manual') {
+    // 手入力モード：手入力アイテムのみ表示
+    if (titleEl) titleEl.textContent = '登録内容';
+    if (quickAddRow) quickAddRow.style.display = 'none';
+    currentItems = manualItems.slice();
+    if (currentItems.length > 0) {
+      document.getElementById('result-area').style.display = 'block';
+      renderItems();
+    } else {
+      document.getElementById('result-area').style.display = 'none';
+    }
   } else {
-    document.getElementById('result-area').style.display = 'none';
+    // カメラモード：カメラ解析アイテムのみ表示
+    if (titleEl) titleEl.textContent = '解析結果';
+    if (quickAddRow) quickAddRow.style.display = 'flex';
+    currentItems = cameraItems.slice();
+    if (currentItems.length > 0) {
+      document.getElementById('result-area').style.display = 'block';
+      renderItems();
+    } else {
+      document.getElementById('result-area').style.display = 'none';
+    }
   }
 }
 
@@ -1017,7 +1034,9 @@ function addManualInputItem() {
       if (color.includes(key)) { colorCode = colorMap[key]; break; }
     }
   }
-  currentItems.push({ category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: '' });
+  var newItem = { category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: '' };
+  currentItems.push(newItem);
+  manualItems.push(newItem);
   renderItems();
   document.getElementById('result-area').style.display = 'block';
   var titleEl = document.getElementById('result-title');
