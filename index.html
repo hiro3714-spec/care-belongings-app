@@ -281,16 +281,57 @@
         <div id="selected-resident-box" style="display:none;"></div>
         <div id="resident-select-list" class="resident-select-list"></div>
       </div>
-      <div class="tip-box">💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます</div>
-      <div class="camera-area" onclick="document.getElementById('file-input').click()">
-        <div class="icon">📷</div>
-        <strong>写真を撮影・選択</strong>
-        <p>持ち物を並べて撮影してください<br>カテゴリーは自動で判定します</p>
+      <div class="mode-toggle" style="margin-bottom:12px;">
+        <div class="mode-btn active" id="input-mode-camera" onclick="setInputMode('camera')">📷 カメラで撮影</div>
+        <div class="mode-btn" id="input-mode-manual" onclick="setInputMode('manual')">✏️ 手入力で登録</div>
       </div>
-      <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)" style="display:none;">
-      <img id="preview" class="preview-img">
-      <button class="btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AIで持ち物を一括解析する</button>
-      <div class="loading" id="loading"><div class="spinner"></div><p>AIが全ての持ち物を解析中...</p></div>
+
+      <div id="camera-input-area">
+        <div class="tip-box">💡 複数の持ち物を並べて一枚で撮影するとまとめて認識できます</div>
+        <div class="camera-area" onclick="document.getElementById('file-input').click()">
+          <div class="icon">📷</div>
+          <strong>写真を撮影・選択</strong>
+          <p>持ち物を並べて撮影してください<br>カテゴリーは自動で判定します</p>
+        </div>
+        <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleImage(event)" style="display:none;">
+        <img id="preview" class="preview-img">
+        <button class="btn-primary" id="analyze-btn" onclick="analyzeImage()" disabled>AIで持ち物を一括解析する</button>
+        <div class="loading" id="loading"><div class="spinner"></div><p>AIが全ての持ち物を解析中...</p></div>
+      </div>
+
+      <div id="manual-input-area" style="display:none;">
+        <div class="tip-box">💡 カテゴリーと品目名を入力して追加ボタンを押してください</div>
+        <div class="card" style="padding:14px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+            <div>
+              <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">カテゴリー</label>
+              <select id="manual-cat" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;background:#fff;">
+                <option value="衣類">👕 衣類</option>
+                <option value="日用品">🪥 日用品</option>
+                <option value="貴重品">💼 貴重品</option>
+                <option value="電化製品">📺 電化製品</option>
+                <option value="趣味・娯楽">📚 趣味・娯楽</option>
+                <option value="医療用品">👓 医療用品</option>
+                <option value="その他">📦 その他</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">🔢 数量</label>
+              <input type="number" id="manual-count" value="1" min="1" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;">
+            </div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">品目名</label>
+            <input type="text" id="manual-name" placeholder="例：パジャマ、タオル、歯ブラシ" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">🎨 色（任意）</label>
+            <input type="text" id="manual-color" placeholder="例：白、ネイビー" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
+          </div>
+          <button onclick="addManualInputItem()" style="width:100%;padding:12px;background:#007aff;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">＋ 追加する</button>
+        </div>
+      </div>
+
       <div id="error-area"></div>
       <div id="result-area" style="display:none;">
         <div class="result-header">
@@ -921,6 +962,61 @@ function renderDetailModal() {
     + '<button class="btn-danger" onclick="deleteResident(' + detailResident.id + ')">⚠️ この入居者を削除する</button>'
     + '</div>';
   document.getElementById('detail-content').innerHTML = html;
+}
+
+function setInputMode(mode) {
+  document.getElementById('input-mode-camera').classList.toggle('active', mode === 'camera');
+  document.getElementById('input-mode-manual').classList.toggle('active', mode === 'manual');
+  document.getElementById('camera-input-area').style.display = mode === 'camera' ? 'block' : 'none';
+  document.getElementById('manual-input-area').style.display = mode === 'manual' ? 'block' : 'none';
+  if (mode === 'manual') {
+    document.getElementById('result-area').style.display = currentItems.length > 0 ? 'block' : 'none';
+    if (currentItems.length === 0) {
+      document.getElementById('result-area').style.display = 'block';
+      renderItems();
+    }
+  }
+}
+
+function addManualInputItem() {
+  var name = document.getElementById('manual-name').value.trim();
+  var cat = document.getElementById('manual-cat').value;
+  var count = parseInt(document.getElementById('manual-count').value) || 1;
+  var color = document.getElementById('manual-color').value.trim();
+  if (!name) {
+    document.getElementById('manual-name').focus();
+    return;
+  }
+  // 色コードのマッピング
+  var colorMap = {
+    '白': '#ffffff', 'しろ': '#ffffff',
+    '黒': '#222222', 'くろ': '#222222',
+    '赤': '#e74c3c', 'あか': '#e74c3c',
+    '青': '#3498db', 'あお': '#3498db',
+    '緑': '#27ae60', 'みどり': '#27ae60',
+    '黄': '#f1c40f', 'きいろ': '#f1c40f', '黄色': '#f1c40f',
+    'ピンク': '#ff69b4',
+    '紫': '#9b59b6', 'むらさき': '#9b59b6',
+    'オレンジ': '#e67e22',
+    '茶': '#8B4513', 'ちゃ': '#8B4513', '茶色': '#8B4513',
+    'グレー': '#95a5a6', '灰': '#95a5a6',
+    'ネイビー': '#2c3e50', '紺': '#2c3e50',
+    'ベージュ': '#f5deb3',
+    'クリーム': '#fffdd0'
+  };
+  var colorCode = '#888888';
+  if (color) {
+    for (var key in colorMap) {
+      if (color.includes(key)) { colorCode = colorMap[key]; break; }
+    }
+  }
+  currentItems.push({ category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: '' });
+  renderItems();
+  document.getElementById('result-area').style.display = 'block';
+  document.getElementById('manual-name').value = '';
+  document.getElementById('manual-color').value = '';
+  document.getElementById('manual-count').value = '1';
+  document.getElementById('manual-name').focus();
 }
 
 function toggleEditMode() { editMode = !editMode; renderDetailModal(); }
