@@ -335,11 +335,11 @@
       <div id="error-area"></div>
       <div id="result-area" style="display:none;">
         <div class="result-header">
-          <h3>解析結果</h3>
+          <h3 id="result-title">解析結果</h3>
           <span class="badge" id="item-count-badge">0点</span>
         </div>
         <div id="items-by-category"></div>
-        <div class="add-row">
+        <div class="add-row" id="quick-add-row">
           <select id="new-cat">
             <option value="衣類">👕 衣類</option>
             <option value="日用品">🪥 日用品</option>
@@ -969,21 +969,19 @@ function setInputMode(mode) {
   document.getElementById('input-mode-manual').classList.toggle('active', mode === 'manual');
   document.getElementById('camera-input-area').style.display = mode === 'camera' ? 'block' : 'none';
   document.getElementById('manual-input-area').style.display = mode === 'manual' ? 'block' : 'none';
-  if (mode === 'manual') {
-    // 手入力モード：アイテムがあれば表示、なければ非表示
-    if (currentItems.length > 0) {
-      document.getElementById('result-area').style.display = 'block';
-      renderItems();
-    } else {
-      document.getElementById('result-area').style.display = 'none';
-    }
+
+  // タイトルと手動追加行を切り替え
+  var titleEl = document.getElementById('result-title');
+  var quickAddRow = document.getElementById('quick-add-row');
+  if (titleEl) titleEl.textContent = mode === 'manual' ? '登録内容' : '解析結果';
+  if (quickAddRow) quickAddRow.style.display = mode === 'manual' ? 'none' : 'flex';
+
+  // 結果エリアの表示制御
+  if (currentItems.length > 0) {
+    document.getElementById('result-area').style.display = 'block';
+    renderItems();
   } else {
-    // カメラモード：アイテムがあれば表示、なければ非表示
-    if (currentItems.length > 0) {
-      document.getElementById('result-area').style.display = 'block';
-    } else {
-      document.getElementById('result-area').style.display = 'none';
-    }
+    document.getElementById('result-area').style.display = 'none';
   }
 }
 
@@ -1022,6 +1020,10 @@ function addManualInputItem() {
   currentItems.push({ category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: '' });
   renderItems();
   document.getElementById('result-area').style.display = 'block';
+  var titleEl = document.getElementById('result-title');
+  var quickAddRow = document.getElementById('quick-add-row');
+  if (titleEl) titleEl.textContent = '登録内容';
+  if (quickAddRow) quickAddRow.style.display = 'none';
   document.getElementById('manual-name').value = '';
   document.getElementById('manual-color').value = '';
   document.getElementById('manual-count').value = '1';
