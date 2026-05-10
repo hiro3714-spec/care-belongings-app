@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理者ダッシュボード</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', sans-serif; background: #f5f5f7; color: #1d1d1f; }
+
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .login-card { background: #fff; border-radius: 16px; padding: 32px; width: 100%; max-width: 360px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); text-align: center; }
+    .login-card h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .login-card p { font-size: 13px; color: #6e6e73; margin-bottom: 24px; }
+    .login-card input { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #e5e5ea; border-radius: 10px; outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 4px; }
+    .login-card button { width: 100%; padding: 14px; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 12px; background: #1d1d1f; color: #fff; border: none; }
+    .error-msg { color: #ff3b30; font-size: 13px; margin-top: 10px; }
+
+    .dashboard { display: none; }
+    .header { background: #1d1d1f; color: #fff; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .header h1 { font-size: 17px; font-weight: 600; }
+    .header-right { font-size: 13px; color: rgba(255,255,255,0.6); cursor: pointer; }
+
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px 24px; }
+    .summary-card { background: #fff; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .summary-num { font-size: 32px; font-weight: 700; color: #1d1d1f; }
+    .summary-label { font-size: 12px; color: #6e6e73; margin-top: 4px; }
+    .summary-card.trial .summary-num { color: #007aff; }
+    .summary-card.active .summary-num { color: #34c759; }
+
+    .search-bar { padding: 0 24px 12px; }
+    .search-bar input { width: 100%; padding: 10px 14px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 14px; outline: none; }
+
+    .table-wrap { padding: 0 24px 24px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-size: 13px; }
+    th { background: #f5f5f7; padding: 12px 14px; text-align: left; font-size: 11px; color: #6e6e73; font-weight: 600; border-bottom: 1px solid #e5e5ea; }
+    td { padding: 12px 14px; border-bottom: 1px solid #f2f2f7; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f9f9f9; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .status-trialing { background: #e8f4fd; color: #007aff; }
+    .status-active { background: #f0fff4; color: #34c759; }
+    .status-none { background: #f5f5f7; color: #6e6e73; }
+    .status-canceled { background: #fff2f2; color: #ff3b30; }
+
+    .copy-btn { background: none; border: 1px solid #e5e5ea; border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer; color: #007aff; }
+    .copy-btn:hover { background: #f0f7ff; }
+
+    .loading { text-align: center; padding: 40px; color: #6e6e73; }
+    .spinner { width: 28px; height: 28px; border: 3px solid #e5e5ea; border-top: 3px solid #007aff; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .refresh-btn { background: #007aff; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; }
+    .empty { text-align: center; padding: 40px; color: #6e6e73; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-wrap" id="login-wrap">
+  <div class="login-card">
+    <div style="font-size:40px;margin-bottom:12px;">🔐</div>
+    <h1>管理者ダッシュボード</h1>
+    <p>持ち物管理アプリ 管理者専用</p>
+    <input type="password" id="admin-password" placeholder="管理者パスワード" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">ログイン</button>
+    <div class="error-msg" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ダッシュボード -->
+<div class="dashboard" id="dashboard">
+  <div class="header">
+    <h1>🏥 管理者ダッシュボード</h1>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="refresh-btn" onclick="loadData()">🔄 更新</button>
+      <span class="header-right" onclick="doLogout()">ログアウト</span>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="summary-card">
+      <div class="summary-num" id="total-count">-</div>
+      <div class="summary-label">登録施設数</div>
+    </div>
+    <div class="summary-card trial">
+      <div class="summary-num" id="trial-count">-</div>
+      <div class="summary-label">トライアル中</div>
+    </div>
+    <div class="summary-card active">
+      <div class="summary-num" id="active-count">-</div>
+      <div class="summary-label">有料契約中</div>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="施設名・メールアドレスで検索..." oninput="filterTable()">
+  </div>
+
+  <div class="table-wrap">
+    <div id="table-container">
+      <div class="loading"><div class="spinner"></div>読み込み中...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var adminPassword = '';
+var allFacilities = [];
+
+function doLogin() {
+  var pw = document.getElementById('admin-password').value;
+  if (!pw) return;
+  adminPassword = pw;
+  document.getElementById('login-wrap').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  loadData();
+}
+
+function doLogout() {
+  adminPassword = '';
+  document.getElementById('login-wrap').style.display = 'flex';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('admin-password').value = '';
+}
+
+async function loadData() {
+  document.getElementById('table-container').innerHTML = '<div class="loading"><div class="spinner"></div>読み込み中...</div>';
+  try {
+    var resp = await fetch('/api/admin-facilities?password=' + encodeURIComponent(adminPassword));
+    var data = await resp.json();
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        alert('パスワードが違います');
+        doLogout();
+        return;
+      }
+      throw new Error(data.error);
+    }
+    allFacilities = data.facilities;
+    document.getElementById('total-count').textContent = data.total;
+    document.getElementById('trial-count').textContent = data.trialing;
+    document.getElementById('active-count').textContent = data.active;
+    renderTable(allFacilities);
+  } catch(e) {
+    document.getElementById('table-container').innerHTML = '<div class="empty">⚠️ データの取得に失敗しました：' + e.message + '</div>';
+  }
+}
+
+function renderTable(facilities) {
+  if (facilities.length === 0) {
+    document.getElementById('table-container').innerHTML = '<div class="empty">登録された施設がありません</div>';
+    return;
+  }
+
+  var rows = facilities.map(function(f) {
+    var statusLabel = { trialing: 'トライアル中', active: '有料契約中', none: '未登録', canceled: '解約済み' }[f.subscription_status] || f.subscription_status;
+    var statusClass = 'status-' + f.subscription_status;
+    var trialInfo = f.trial_end ? '（' + f.trial_end + 'まで）' : '';
+    return '<tr>'
+      + '<td><strong>' + f.facility_name + '</strong></td>'
+      + '<td>' + f.email + ' <button class="copy-btn" onclick="copyText(\'' + f.email + '\')">コピー</button></td>'
+      + '<td>' + f.resident_count + '人</td>'
+      + '<td><span class="status-badge ' + statusClass + '">' + statusLabel + '</span>' + trialInfo + '</td>'
+      + '<td>' + f.created_at + '</td>'
+      + '<td>' + f.last_sign_in + '</td>'
+      + '</tr>';
+  }).join('');
+
+  document.getElementById('table-container').innerHTML =
+    '<table>'
+    + '<thead><tr>'
+    + '<th>施設名</th>'
+    + '<th>メールアドレス</th>'
+    + '<th>入居者数</th>'
+    + '<th>契約状況</th>'
+    + '<th>登録日</th>'
+    + '<th>最終ログイン</th>'
+    + '</tr></thead>'
+    + '<tbody>' + rows + '</tbody>'
+    + '</table>';
+}
+
+function filterTable() {
+  var q = document.getElementById('search-input').value.toLowerCase();
+  var filtered = allFacilities.filter(function(f) {
+    return f.facility_name.toLowerCase().includes(q) || f.email.toLowerCase().includes(q);
+  });
+  renderTable(filtered);
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(function() {
+    alert('コピーしました：' + text);
+  });
+}
+</script>
+</body>
+</html>
