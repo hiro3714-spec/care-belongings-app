@@ -275,6 +275,8 @@
           <input type="text" id="resident-name" placeholder="例：山田 花子">
           <label>部屋番号</label>
           <input type="text" id="room-number" placeholder="例：203号室">
+          <label>メモ（任意）</label>
+          <input type="text" id="resident-memo" placeholder="例：アレルギーあり、認知症など">
         </div>
       </div>
       <div id="form-existing" style="display:none;">
@@ -328,6 +330,10 @@
           <div id="manual-color-field" style="margin-bottom:10px;">
             <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">🎨 色（任意）</label>
             <input type="text" id="manual-color" placeholder="例：白、ネイビー" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
+          </div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">📝 備考（任意）</label>
+            <input type="text" id="manual-note" placeholder="例：名前が書いてある、壊れやすい" style="width:100%;font-size:14px;padding:8px;border:1px solid #e5e5ea;border-radius:8px;" onkeydown="if(event.key==='Enter')addManualInputItem()">
           </div>
           <div id="manual-money-field" style="display:none;margin-bottom:10px;">
             <label style="font-size:12px;color:#6e6e73;display:block;margin-bottom:4px;">💰 金額</label>
@@ -1074,13 +1080,14 @@ async function saveResident() {
     name = document.getElementById('resident-name').value.trim();
     room = document.getElementById('room-number').value.trim();
   }
+  var memo = (currentMode === 'existing' && selectedResident) ? (selectedResident.memo || '') : (document.getElementById('resident-memo') ? document.getElementById('resident-memo').value.trim() : '');
   if (!name) { alert('入所者名を入力してください'); return; }
   if (currentItems.length === 0) { alert('持ち物が登録されていません'); return; }
   var btn = document.getElementById('save-btn');
   btn.disabled = true; btn.textContent = '保存中...';
   try {
     var resp = await fetch('/api/save', {method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({facility_name:currentFacility, resident_name:name, room_number:room, items:currentItems, registered_date:new Date().toLocaleDateString('ja-JP'), resident_id:residentId})});
+      body:JSON.stringify({facility_name:currentFacility, resident_name:name, room_number:room, items:currentItems, registered_date:new Date().toLocaleDateString('ja-JP'), resident_id:residentId, memo:memo})});
     if (!resp.ok) { var err = await resp.json(); throw new Error(err.error); }
     var result = await resp.json();
     var msg = result.merged ? '既存のリストに追加しました！' : '新規登録しました！';
@@ -1136,9 +1143,11 @@ function renderDetailModal() {
     if (!grouped[cat]) grouped[cat] = [];
     grouped[cat].push(Object.assign({}, item, {_didx: i}));
   });
+  var memoHtml = detailResident.memo ? '<div style="margin-top:6px;padding:6px 10px;background:#fff9f0;border-radius:6px;font-size:12px;color:#ff9500;border:1px solid #ffe0b2;">📝 ' + detailResident.memo + '</div>' : '';
   var html = '<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e5e5ea;">'
     + '<p style="font-size:16px;font-weight:600;">' + detailResident.resident_name + '</p>'
     + '<p style="font-size:13px;color:#6e6e73;">' + (detailResident.room_number ? detailResident.room_number + '　' : '') + '更新日：' + detailResident.registered_date + '　合計 ' + total + ' 点</p>'
+    + memoHtml
     + '</div>'
     + '<div class="edit-mode-bar no-print">'
     + '<span style="font-size:12px;color:#6e6e73;">' + (editMode ? '✏️ タップして編集、×で削除' : '') + '</span>'
@@ -1272,8 +1281,10 @@ function addManualInputItem() {
   var name = document.getElementById('manual-name').value.trim();
   var count = parseInt(document.getElementById('manual-count').value) || 1;
   var color = document.getElementById('manual-color').value.trim();
+  var note = document.getElementById('manual-note') ? document.getElementById('manual-note').value.trim() : '';
   if (!name) {
-    document.getElementById('manual-name').focus();
+    if (document.getElementById('manual-note')) document.getElementById('manual-note').value = '';
+  document.getElementById('manual-name').focus();
     return;
   }
   // 色コードのマッピング
@@ -1299,7 +1310,7 @@ function addManualInputItem() {
       if (color.includes(key)) { colorCode = colorMap[key]; break; }
     }
   }
-  var newItem = { category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: '' };
+  var newItem = { category: cat, name: name, color: color || 'なし', colorCode: colorCode, count: count, note: note };
   currentItems.push(newItem);
   manualItems.push(newItem);
   renderItems();
@@ -1311,6 +1322,7 @@ function addManualInputItem() {
   document.getElementById('manual-name').value = '';
   document.getElementById('manual-color').value = '';
   document.getElementById('manual-count').value = '1';
+  if (document.getElementById('manual-note')) document.getElementById('manual-note').value = '';
   document.getElementById('manual-name').focus();
 }
 
