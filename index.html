@@ -1118,8 +1118,11 @@ async function loadResidents() {
         return '<span class="cat-tag">' + (CATS[c] ? CATS[c].icon : '📦') + ' ' + c + '</span>';
       }).join('');
       return '<div class="resident-card" onclick="openDetailModal(' + r.id + ', \'' + encodeURIComponent(JSON.stringify(r)) + '\')">'
-        + '<div><div class="resident-name">' + r.resident_name + '</div>'
+        + '<div style="display:flex;align-items:center;gap:12px;width:100%;">'
+        + (r.photo_url ? '<img src="' + r.photo_url + '" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid #e5e5ea;">' : '<div style="width:48px;height:48px;border-radius:50%;background:#f0f7ff;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;border:2px solid #e5e5ea;">👤</div>')
+        + '<div style="flex:1;"><div class="resident-name">' + r.resident_name + '</div>'
         + '<div class="resident-meta">' + (r.room_number ? r.room_number + '　' : '') + r.registered_date + '　' + total + '点</div>'
+        + (r.memo ? '<div style="font-size:11px;color:#ff9500;margin-top:3px;">📝 ' + r.memo + '</div>' : '')
         + '<div class="resident-cats">' + catTags + '</div></div>'
         + '<div class="resident-arrow">›</div></div>';
     }).join('');
@@ -1144,10 +1147,19 @@ function renderDetailModal() {
     grouped[cat].push(Object.assign({}, item, {_didx: i}));
   });
   var memoHtml = detailResident.memo ? '<div style="margin-top:6px;padding:6px 10px;background:#fff9f0;border-radius:6px;font-size:12px;color:#ff9500;border:1px solid #ffe0b2;">📝 ' + detailResident.memo + '</div>' : '';
+  var photoHtml = detailResident.photo_url
+    ? '<img src="' + detailResident.photo_url + '?t=' + Date.now() + '" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #e5e5ea;flex-shrink:0;">'
+    : '<div style="width:72px;height:72px;border-radius:50%;background:#f0f7ff;display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;border:3px solid #e5e5ea;">👤</div>';
   var html = '<div style="margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #e5e5ea;">'
-    + '<p style="font-size:16px;font-weight:600;">' + detailResident.resident_name + '</p>'
+    + '<div style="display:flex;align-items:center;gap:14px;">'
+    + '<div style="position:relative;">'
+    + photoHtml
+    + '<label for="photo-upload" style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:#007aff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;">📷</label>'
+    + '<input type="file" id="photo-upload" accept="image/*" capture="environment" style="display:none;" onchange="uploadPhoto(event)">'
+    + '</div>'
+    + '<div style="flex:1;"><p style="font-size:16px;font-weight:600;">' + detailResident.resident_name + '</p>'
     + '<p style="font-size:13px;color:#6e6e73;">' + (detailResident.room_number ? detailResident.room_number + '　' : '') + '更新日：' + detailResident.registered_date + '　合計 ' + total + ' 点</p>'
-    + memoHtml
+    + memoHtml + '</div></div>'
     + '</div>'
     + '<div class="edit-mode-bar no-print">'
     + '<span style="font-size:12px;color:#6e6e73;">' + (editMode ? '✏️ タップして編集、×で削除' : '') + '</span>'
@@ -1324,6 +1336,31 @@ function addManualInputItem() {
   document.getElementById('manual-count').value = '1';
   if (document.getElementById('manual-note')) document.getElementById('manual-note').value = '';
   document.getElementById('manual-name').focus();
+}
+
+async function uploadPhoto(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = async function(ev) {
+    try {
+      var resp = await fetch('/api/update-items', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          image: ev.target.result,
+          resident_id: detailResident.id,
+          file_type: file.type
+        })
+      });
+      var data = await resp.json();
+      if (!resp.ok) { alert('アップロードに失敗しました'); return; }
+      detailResident.photo_url = data.photo_url;
+      renderDetailModal();
+      loadResidents();
+    } catch(err) { alert('エラーが発生しました'); }
+  };
+  reader.readAsDataURL(file);
 }
 
 function toggleEditMode() { editMode = !editMode; renderDetailModal(); }
