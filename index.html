@@ -460,6 +460,19 @@
   </div>
 </div>
 
+<!-- 履歴モーダル -->
+<div class="modal" id="history-modal">
+  <div class="modal-inner">
+    <div class="modal-header">
+      <h2>📋 変更履歴</h2>
+      <span class="modal-close" onclick="document.getElementById('history-modal').style.display='none'">閉じる</span>
+    </div>
+    <div id="history-content">
+      <div class="loading"><div class="spinner"></div><p>読み込み中...</p></div>
+    </div>
+  </div>
+</div>
+
 <!-- 退所チェックモーダル -->
 <div class="modal" id="checkout-modal">
   <div class="modal-inner">
@@ -1232,6 +1245,10 @@ function renderDetailModal() {
     + '🚪 退所チェックを開始する</button>'
     + '</div>'
     + '<div style="margin-top:8px;" class="no-print">'
+    + '<button class="btn-secondary" onclick="showHistory()" style="background:#f0f7ff;color:#007aff;border:1px solid #007aff;">'
+    + '📋 変更履歴を見る</button>'
+    + '</div>'
+    + '<div style="margin-top:8px;" class="no-print">'
     + '<button class="btn-danger" onclick="deleteResident(' + detailResident.id + ')">⚠️ この入居者を削除する</button>'
     + '</div>';
   document.getElementById('detail-content').innerHTML = html;
@@ -1368,13 +1385,62 @@ function updateDetailItem(idx, field, value) { detailItems[idx][field] = value; 
 
 async function saveDetailEdits() {
   try {
+    var oldItems = JSON.parse(detailResident.items || '[]');
+    var changes = [];
+    oldItems.forEach(function(old) {
+      var found = detailItems.find(function(n) { return n.name === old.name && n.category === old.category; });
+      if (!found) changes.push({ action: '削除', item_name: old.name, detail: old.category + ' / ' + (old.color || '') + ' / ' + old.count + '点' });
+    });
+    detailItems.forEach(function(newItem) {
+      var old = oldItems.find(function(o) { return o.name === newItem.name && o.category === newItem.category; });
+      if (!old) {
+        changes.push({ action: '追加', item_name: newItem.name, detail: newItem.category + ' / ' + (newItem.color || '') + ' / ' + newItem.count + '点' });
+      } else if (old.count !== newItem.count || old.color !== newItem.color) {
+        changes.push({ action: '変更', item_name: newItem.name, detail: old.count + '点→' + newItem.count + '点 / ' + (old.color || '') + '→' + (newItem.color || '') });
+      }
+    });
     await fetch('/api/update-items', {method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify({id:detailResident.id, items:detailItems})});
+    for (var i = 0; i < changes.length; i++) {
+      await fetch('/api/residents', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ resident_id: detailResident.id, action: changes[i].action, item_name: changes[i].item_name, detail: changes[i].detail })
+      });
+    }
     detailResident.items = JSON.stringify(detailItems);
     editMode = false;
     renderDetailModal();
     loadResidents();
     alert('保存しました！');
   } catch(e) { alert('保存に失敗しました'); }
+}
+
+async function showHistory() {
+  document.getElementById('history-modal').style.display = 'block';
+  document.getElementById('history-content').innerHTML = '<div class="loading"><div class="spinner"></div><p>読み込み中...</p></div>';
+  try {
+    var resp = await fetch('/api/residents?history=true&resident_id=' + detailResident.id);
+    var data = await resp.json();
+    if (!data.length) {
+      document.getElementById('history-content').innerHTML = '<div class="empty"><div class="icon">📋</div>変更履歴はありません</div>';
+      return;
+    }
+    var actionColors = { '追加': '#34c759', '削除': '#ff3b30', '変更': '#007aff' };
+    var html = data.map(function(h) {
+      var date = new Date(h.created_at).toLocaleString('ja-JP');
+      var color = actionColors[h.action] || '#6e6e73';
+      return '<div style="padding:12px 0;border-bottom:1px solid #f2f2f7;">'
+        + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">'
+        + '<span style="background:' + color + ';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">' + h.action + '</span>'
+        + '<span style="font-size:13px;font-weight:600;">' + h.item_name + '</span>'
+        + '</div>'
+        + (h.detail ? '<div style="font-size:12px;color:#6e6e73;margin-bottom:4px;">' + h.detail + '</div>' : '')
+        + '<div style="font-size:11px;color:#c7c7cc;">' + date + '</div>'
+        + '</div>';
+    }).join('');
+    document.getElementById('history-content').innerHTML = html;
+  } catch(e) {
+    document.getElementById('history-content').innerHTML = '<div class="error-msg">⚠️ 読み込みに失敗しました</div>';
+  }
 }
 
 async function removeDetailItem(idx) {
