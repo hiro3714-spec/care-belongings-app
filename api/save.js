@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { facility_name, resident_name, room_number, items, registered_date, resident_id } = req.body;
+  const { facility_name, resident_name, room_number, items, registered_date, resident_id, memo } = req.body;
 
   if (!resident_name || !items) {
     return res.status(400).json({ error: 'データが不足しています' });
@@ -19,7 +19,6 @@ export default async function handler(req, res) {
 
   try {
     if (resident_id) {
-      // 既存の入居者に追記
       const getResp = await fetch(`${SUPABASE_URL}/rest/v1/residents?id=eq.${resident_id}`, { headers });
       const existing = await getResp.json();
       if (existing.length > 0) {
@@ -29,13 +28,12 @@ export default async function handler(req, res) {
           ...oldItems.filter(i => !newCats.includes(i.category)),
           ...items
         ];
+        const updateBody = { items: JSON.stringify(mergedItems), registered_date };
+        if (memo !== undefined) updateBody.memo = memo;
         const updateResp = await fetch(`${SUPABASE_URL}/rest/v1/residents?id=eq.${resident_id}`, {
           method: 'PATCH',
           headers: { ...headers, 'Prefer': 'return=representation' },
-          body: JSON.stringify({
-            items: JSON.stringify(mergedItems),
-            registered_date
-          })
+          body: JSON.stringify(updateBody)
         });
         if (!updateResp.ok) {
           const err = await updateResp.json();
@@ -46,7 +44,6 @@ export default async function handler(req, res) {
       }
     }
 
-    // 同じ施設・入居者名・部屋番号で検索
     let searchUrl = `${SUPABASE_URL}/rest/v1/residents?resident_name=eq.${encodeURIComponent(resident_name)}`;
     if (facility_name) searchUrl += `&facility_name=eq.${encodeURIComponent(facility_name)}`;
     if (room_number) searchUrl += `&room_number=eq.${encodeURIComponent(room_number)}`;
@@ -55,17 +52,18 @@ export default async function handler(req, res) {
     const existing = await searchResp.json();
 
     if (existing.length > 0) {
-      // 既存に追記
       const oldItems = JSON.parse(existing[0].items || '[]');
       const newCats = [...new Set(items.map(i => i.category))];
       const mergedItems = [
         ...oldItems.filter(i => !newCats.includes(i.category)),
         ...items
       ];
+      const updateBody = { items: JSON.stringify(mergedItems), registered_date };
+      if (memo !== undefined) updateBody.memo = memo;
       const updateResp = await fetch(`${SUPABASE_URL}/rest/v1/residents?id=eq.${existing[0].id}`, {
         method: 'PATCH',
         headers: { ...headers, 'Prefer': 'return=representation' },
-        body: JSON.stringify({ items: JSON.stringify(mergedItems), registered_date })
+        body: JSON.stringify(updateBody)
       });
       const data = await updateResp.json();
       return res.status(200).json({ success: true, data, merged: true });
@@ -80,7 +78,8 @@ export default async function handler(req, res) {
         resident_name,
         room_number: room_number || '',
         items: JSON.stringify(items),
-        registered_date
+        registered_date,
+        memo: memo || ''
       })
     });
     if (!createResp.ok) {
